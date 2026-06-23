@@ -33,7 +33,7 @@ Commands available in `atom-workspace`:
 
 Commands available in `atom-text-editor`:
 
-- `prettier-plus:format`: <kbd>Ctrl+Alt+F</kbd> format the active editor.
+- `prettier-plus:format`: format the active editor.
 
 Commands available in `.tree-view`:
 
