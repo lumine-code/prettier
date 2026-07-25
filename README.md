@@ -1,6 +1,8 @@
 # prettier
 
-Format files using [Prettier](https://prettier.io).
+Format files using Prettier.
+
+Formatting is provided by [Prettier](https://prettier.io).
 
 ## Features
 
