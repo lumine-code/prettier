@@ -1,82 +1,82 @@
 {
-  "name": "prettier-plus",
-  "main": "./lib/main.js",
-  "version": "1.0.0",
-  "description": "Pulsar plugin for formatting files using Prettier",
+  "name": "prettier",
+  "author": "lumine-code",
+  "description": "Format files using Prettier",
+  "repository": "https://github.com/lumine-code/prettier",
+  "bugs": {
+    "url": "https://github.com/lumine-code/prettier/issues"
+  },
   "keywords": [
     "javascript",
     "prettier"
   ],
-  "repository": "https://github.com/asiloisad/pulsar-prettier-plus",
+  "version": "2.0.0",
   "license": "MIT",
+  "engines": {
+    "atom": ">=1.100.0 <2.0.0"
+  },
+  "main": "./lib/main.js",
+  "scripts": {
+    "test": "cd ../lumine && npm run test:only -- ../prettier/spec",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
   "activationHooks": [
     "core:loaded-shell-environment"
   ],
-  "dependencies": {
-    "minimatch": "^10.1.2",
-    "prettier": "^3.5.3"
-  },
   "configSchema": {
     "formatOnSaveOptions": {
       "title": "Format on Save",
-      "order": 1,
       "type": "object",
       "properties": {
         "enabled": {
           "title": "Format Files on Save",
           "description": "Automatically format entire file when saving.",
           "type": "boolean",
-          "default": false,
-          "order": 1
+          "default": false
         },
         "respectEslintignore": {
           "title": "Respect `.eslintignore`",
           "description": "Skip files listed in `.eslintignore` when formatting on save.",
           "type": "boolean",
-          "default": true,
-          "order": 2
+          "default": true
         },
         "showInStatusBar": {
           "title": "Show in Status Bar",
           "description": "Show format-on-save status in the status bar.",
           "type": "boolean",
-          "default": false,
-          "order": 3
+          "default": false
         },
         "excludedGlobs": {
           "title": "Excluded Globs",
           "description": "Comma-separated list of file globs to exclude from formatting on save. Takes precedence over scopes.",
           "type": "array",
-          "default": [],
-          "order": 4
+          "default": []
         },
         "whitelistedGlobs": {
           "title": "Included Globs",
           "description": "Comma-separated list of file globs to always format on save. Takes precedence over excluded globs. If non-empty, only matching files will be formatted.",
           "type": "array",
-          "default": [],
-          "order": 5
+          "default": []
         },
         "isDisabledIfNotInPackageJson": {
           "title": "Require Prettier in Dependencies",
           "description": "Only format on save when `prettier` is in your project's `package.json` dependencies.",
           "type": "boolean",
-          "default": false,
-          "order": 6
+          "default": false
         },
         "isDisabledIfNoConfigFile": {
           "title": "Require Prettier Config",
           "description": "Only format on save when a Prettier config file (`.prettierrc`, `prettier.config.js`, or `prettier` key in `package.json`) is found.",
           "type": "boolean",
-          "default": false,
-          "order": 7
+          "default": false
         },
         "ignoreNodeModules": {
           "title": "Ignore `node_modules`",
           "description": "Skip files inside `node_modules` when formatting on save.",
           "type": "boolean",
-          "default": true,
-          "order": 8
+          "default": true
         }
       }
     },
@@ -84,8 +84,7 @@
       "title": "Debug Mode",
       "description": "Log Prettier detection and resolution info to developer console.",
       "type": "boolean",
-      "default": false,
-      "order": 2
+      "default": false
     }
   },
   "consumedServices": {
@@ -109,5 +108,16 @@
         "^1.0.0": "consumeTreeView"
       }
     }
+  },
+  "dependencies": {
+    "minimatch": "^10.2.5",
+    "prettier-bundled": "npm:prettier@^3.9.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-n": "^18.2.2",
+    "globals": "^17.7.0"
   }
 }

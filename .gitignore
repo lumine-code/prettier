@@ -1,7 +1,20 @@
-node_modules
-npm-debug.log
-.nyc_output
-coverage
-.opt-in
-.opt-out
-yarn-error.log
+# Dependencies
+node_modules/
+
+# Build artifacts
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# IDE
+.idea/
+.vscode/
+*.sublime-workspace

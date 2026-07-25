@@ -3,7 +3,7 @@
     "atom-text-editor": [
       {
         "label": "Format with Prettier",
-        "command": "prettier-plus:format"
+        "command": "prettier:format"
       }
     ]
   },
@@ -12,27 +12,27 @@
       "label": "Packages",
       "submenu": [
         {
-          "label": "Prettier Plus",
+          "label": "Prettier",
           "submenu": [
             {
               "label": "Format",
-              "command": "prettier-plus:format"
+              "command": "prettier:format"
             },
             {
               "label": "Format Projects",
-              "command": "prettier-plus:format-projects"
+              "command": "prettier:format-projects"
             },
             {
               "label": "Format Selected",
-              "command": "prettier-plus:format-selected"
+              "command": "prettier:format-selected"
             },
             {
               "label": "Show Diagnostics",
-              "command": "prettier-plus:show-diagnostics"
+              "command": "prettier:show-diagnostics"
             },
             {
               "label": "Toggle Format on Save",
-              "command": "prettier-plus:toggle"
+              "command": "prettier:toggle"
             }
           ]
         }
