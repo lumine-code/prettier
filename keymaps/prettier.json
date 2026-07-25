@@ -1,5 +1,8 @@
 {
   "atom-text-editor": {
     "ctrl-alt-f": "prettier:format"
+  },
+  ".prettier-observed-files-list": {
+    "ctrl-d": "prettier:unobserve-selected-file"
   }
 }

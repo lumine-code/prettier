@@ -33,6 +33,18 @@
             {
               "label": "Toggle Format on Save",
               "command": "prettier:toggle"
+            },
+            {
+              "label": "Toggle Observe Current File",
+              "command": "prettier:toggle-observed"
+            },
+            {
+              "label": "Observed Files",
+              "command": "prettier:observed-files"
+            },
+            {
+              "label": "Clear All Observed Files",
+              "command": "prettier:clear-all-observed-files"
             }
           ]
         }

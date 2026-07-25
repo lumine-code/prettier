@@ -1,0 +1,14 @@
+/*
+ * Lumine exposes the editor UI theme variables as CSS custom properties
+ * (e.g. --background-color-highlight), so no Less import is needed here.
+ */
+
+.prettier-observed-status {
+  padding: 0 0.5em;
+  cursor: default;
+
+  &:hover {
+    background-color: var(--background-color-highlight);
+    opacity: 0.8;
+  }
+}

@@ -17,7 +17,7 @@
   },
   "main": "./lib/main.js",
   "scripts": {
-    "test": "cd ../lumine && npm run test:only -- ../prettier/spec",
+    "test": "cd ../../lumine && npm run test:only -- ../pkg_lumine/prettier/spec",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
@@ -110,6 +110,7 @@
     }
   },
   "dependencies": {
+    "@lumine-code/select-list": "https://github.com/lumine-code/select-list.git#fbbc2d9660db6a2ff676c7a3baf7536f96ec34e6",
     "minimatch": "^10.2.5",
     "prettier-bundled": "npm:prettier@^3.9.6"
   },
