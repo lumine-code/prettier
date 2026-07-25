@@ -7,8 +7,14 @@
     "url": "https://github.com/lumine-code/prettier/issues"
   },
   "keywords": [
+    "format",
+    "formatter",
     "javascript",
-    "prettier"
+    "typescript",
+    "beautify",
+    "format-on-save",
+    "html",
+    "json"
   ],
   "version": "1.0.0",
   "license": "MIT",
