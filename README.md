@@ -46,8 +46,8 @@ Enable **Debug Mode** in settings to log Prettier detection, resolution paths, a
 ## Services
 
 - **status-bar** (`^1.0.0`): consumed to show the optional format-on-save status tile.
-- **atom-ide-busy-signal** (`0.1.0`): consumed to report progress while project formats are running.
-- **linter-indie** (`2.0.0`): consumed to report Prettier formatting errors as linter messages.
+- **atom-ide-busy-signal** (`^1.0.0`): consumed to report progress while project formats are running.
+- **linter-indie** (`^1.0.0`): consumed to report Prettier formatting errors as linter messages.
 - **tree-view** (`^1.0.0`): consumed to resolve the selected files or folders for `prettier:format-selected`.
 
 ## Contributing
