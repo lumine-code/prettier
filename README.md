@@ -66,7 +66,7 @@ The status-bar items can be restyled from your `styles.less`, e.g.:
 - **status-bar** (`^1.0.0`): consumed to show the optional format-on-save status tile and the observed-file count.
 - **busy-signal.reporter** (`^1.0.0`): consumed to report progress while project formats are running.
 - **linter.registry** (`^1.0.0`): consumed to report Prettier formatting errors as linter messages.
-- **tree-view** (`^1.0.0`): consumed to resolve the selected files or folders for `prettier:format-selected`.
+- **tree-view.selection** (`^1.0.0`): consumed to resolve the selected files or folders for `prettier:format-selected`.
 
 ## Contributing
 
