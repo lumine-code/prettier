@@ -99,9 +99,9 @@
         "^1.0.0": "consumeStatusBar"
       }
     },
-    "atom-ide-busy-signal": {
+    "busy-signal.reporter": {
       "versions": {
-        "^1.0.0": "consumeBusySignal"
+        "^1.0.0": "consumeBusySignalReporter"
       }
     },
     "linter-indie": {
