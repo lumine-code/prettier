@@ -64,7 +64,7 @@ The status-bar items can be restyled from your `styles.less`, e.g.:
 ## Services
 
 - **[status-bar](https://lumine-code.github.io/docs.html#services/status-bar)** (`^1.0.0`): consumed to show the optional format-on-save status tile and the observed-file count.
-- **[busy-signal.reporter](https://lumine-code.github.io/docs.html#services/busy-signal.reporter)** (`^1.0.0`): consumed to report progress while project formats are running.
+- **[busy-signal](https://lumine-code.github.io/docs.html#services/busy-signal)** (`^1.0.0`): consumed to report progress while project formats are running.
 - **[linter.registry](https://lumine-code.github.io/docs.html#services/linter.registry)** (`^1.0.0`): consumed to report Prettier formatting errors as linter messages.
 - **[tree-view.selection](https://lumine-code.github.io/docs.html#services/tree-view.selection)** (`^1.0.0`): consumed to resolve the selected files or folders for `prettier:format-selected`.
 

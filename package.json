@@ -99,9 +99,9 @@
         "^1.0.0": "consumeStatusBar"
       }
     },
-    "busy-signal.reporter": {
+    "busy-signal": {
       "versions": {
-        "^1.0.0": "consumeBusySignalReporter"
+        "^1.0.0": "consumeBusySignal"
       }
     },
     "linter.registry": {
