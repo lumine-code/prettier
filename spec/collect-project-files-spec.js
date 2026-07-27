@@ -5,9 +5,7 @@ const os = require("os");
 const collectProjectFiles = require("../lib/collect-project-files");
 
 function buildFixture() {
-  const dir = fs.realpathSync.native(
-    fs.mkdtempSync(path.join(os.tmpdir(), "prettier-collect-")),
-  );
+  const dir = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), "prettier-collect-")));
   fs.writeFileSync(path.join(dir, "index.js"), "const a = 1\n");
   fs.mkdirSync(path.join(dir, "src"));
   fs.writeFileSync(path.join(dir, "src", "app.js"), "const b = 2\n");
