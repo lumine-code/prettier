@@ -86,6 +86,12 @@
         }
       }
     },
+    "excludeVcsIgnoredPaths": {
+      "title": "Exclude VCS ignored paths",
+      "description": "Skip files your VCS ignores when formatting a project. Turn this off to format ignored files such as build output or vendored code.",
+      "type": "boolean",
+      "default": true
+    },
     "debug": {
       "title": "Debug Mode",
       "description": "Log Prettier detection and resolution info to developer console.",
