@@ -200,6 +200,38 @@ describe("prettier", () => {
       expect(modals.visibleLabels()).toEqual([two]);
     });
 
+    it("follows the observed set while it is open", async () => {
+      const one = writeTempFile("one.js");
+      const two = writeTempFile("two.js");
+      observedFiles.setObserved(one, true);
+
+      await openList();
+      expect(modals.visibleLabels()).toEqual([one]);
+
+      // The set also changes from the status tile, `prettier:toggle-observed`
+      // and `prettier:clear-all-observed-files`, none of which go through the
+      // list's own action.
+      observedFiles.setObserved(two, true);
+      await modals.settle();
+      expect(modals.visibleLabels().sort()).toEqual([one, two].sort());
+
+      observedFiles.clearObserved();
+      await modals.settle();
+      expect(modals.visibleLabels()).toEqual([]);
+      expect(atom.modals.isOpen()).toBe(true);
+    });
+
+    it("binds the unobserve action to ctrl-d", async () => {
+      observedFiles.setObserved(writeTempFile("one.js"), true);
+
+      await openList();
+      const keystrokes = atom.keymaps
+        .findKeyBindings({ command: "modals:unobserve-file", target: modals.modalElement() })
+        .map((binding) => binding.keystrokes);
+
+      expect(keystrokes).toContain("ctrl-d");
+    });
+
     it("closes once the last observed file is gone", async () => {
       observedFiles.setObserved(writeTempFile("only.js"), true);
 
