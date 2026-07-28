@@ -21,6 +21,9 @@
   "engines": {
     "atom": ">=1.100.0 <2.0.0"
   },
+  "backgroundTips": [
+    "You can format the current file with Prettier using {{ 'prettier:format' | keystroke }}"
+  ],
   "main": "./lib/main.js",
   "scripts": {
     "test": "lumine --test spec",
