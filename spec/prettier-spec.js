@@ -135,6 +135,100 @@ describe("prettier", () => {
     }, 60000);
   });
 
+  describe("prettier:observed-files", () => {
+    let modals, observedFiles, tempDir;
+
+    function writeTempFile(name) {
+      const filePath = path.join(tempDir, name);
+      fs.writeFileSync(filePath, "const a = 1;\n");
+      return filePath;
+    }
+
+    async function openList() {
+      atom.commands.dispatch(workspaceElement, "prettier:observed-files");
+      await modals.settle();
+    }
+
+    beforeEach(() => {
+      // The shared modal vocabulary lives in the editor checkout, which sits at
+      // a different depth relative to this package in the workspace than it
+      // does in CI, so resolve it through the running editor instead.
+      modals = require(
+        path.join(atom.getLoadSettings().resourcePath, "spec", "helpers", "modal-helpers"),
+      );
+      observedFiles = require("../lib/observed-files");
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "prettier-spec-"));
+    });
+
+    afterEach(async () => {
+      if (atom.modals.isOpen()) {
+        modals.cancel();
+        await modals.settle();
+      }
+      observedFiles.clearObserved();
+      try {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      } catch {
+        // Windows can refuse to delete a directory whose files were just saved.
+      }
+    });
+
+    it("lists every observed file", async () => {
+      const one = writeTempFile("one.js");
+      const two = writeTempFile("two.js");
+      observedFiles.setObserved(one, true);
+      observedFiles.setObserved(two, true);
+
+      await openList();
+
+      expect(modals.visibleLabels().sort()).toEqual([one, two].sort());
+    });
+
+    it("stops observing the focused file and stays open", async () => {
+      const one = writeTempFile("one.js");
+      const two = writeTempFile("two.js");
+      observedFiles.setObserved(one, true);
+      observedFiles.setObserved(two, true);
+
+      await openList();
+      modals.activeSession().focusItem(one);
+      modals.dispatch("modals:unobserve-file");
+      await modals.settle();
+
+      expect(observedFiles.isObserved(one)).toBe(false);
+      expect(atom.modals.isOpen()).toBe(true);
+      expect(modals.visibleLabels()).toEqual([two]);
+    });
+
+    it("closes once the last observed file is gone", async () => {
+      observedFiles.setObserved(writeTempFile("only.js"), true);
+
+      await openList();
+      modals.dispatch("modals:unobserve-file");
+      await modals.settle();
+
+      expect(observedFiles.getObservedCount()).toBe(0);
+      expect(atom.modals.isOpen()).toBe(false);
+    });
+
+    it("opens the confirmed file", async () => {
+      const one = writeTempFile("one.js");
+      observedFiles.setObserved(one, true);
+
+      await openList();
+      await modals.confirmItem((item) => item.filePath === one);
+
+      // The confirm handler opens without awaiting, as the select-list version
+      // did, so wait for the editor rather than the modal.
+      const opened = await pollUntil(() => {
+        const editor = atom.workspace.getActiveTextEditor();
+        return editor && path.basename(editor.getPath() || "") === "one.js";
+      });
+      expect(opened).toBe(true);
+      expect(atom.modals.isOpen()).toBe(false);
+    });
+  });
+
   describe("prettier:toggle", () => {
     it("flips the format-on-save setting", () => {
       expect(atom.config.get("prettier.formatOnSaveOptions.enabled")).toBe(false);
