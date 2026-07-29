@@ -49,7 +49,7 @@ Prettier resolution order:
 
 Enable **Debug Mode** in settings to log Prettier detection, resolution paths, and formatting details to the developer console.
 
-Observed files are an addition to the format-on-save settings, not a replacement: a file marked as observed is formatted on every save even when **Format Files on Save** is off or the glob, `.eslintignore`, `package.json` and config-file requirements would have excluded it. The checks that decide whether Prettier can handle the file at all still apply. Alt-click the status-bar tile or run `prettier:toggle-observed` to mark the active file. A second status-bar item on the right shows how many files are currently observed and is hidden when there are none. Left click it to open the observed-files list, where **Enter** opens the selected file and **Ctrl+D** stops observing it; right click clears every observed file at once. Observed files are not remembered between sessions.
+Observed files are an addition to the format-on-save settings, not a replacement: a file marked as observed is formatted on every save even when **Format Files on Save** is off or the glob, `.eslintignore`, `package.json` and config-file requirements would have excluded it. The checks that decide whether Prettier can handle the file at all still apply. Alt-click the status-bar tile or run `prettier:toggle-observed` to mark the active file. A second status-bar item on the right shows how many files are currently observed and is hidden when there are none. Left click it to open the observed-files list, where a file can be opened or dropped from observation; right click clears every observed file at once. Observed files are not remembered between sessions.
 
 ## Customization
 
