@@ -25,6 +25,13 @@
     "You can format the current file with Prettier using {{ 'prettier:format' | keystroke }}"
   ],
   "main": "./lib/main.js",
+  "files": [
+    "keymaps",
+    "lib",
+    "menus",
+    "spec",
+    "styles"
+  ],
   "scripts": {
     "test": "lumine --test spec",
     "lint": "eslint . --max-warnings 0",
