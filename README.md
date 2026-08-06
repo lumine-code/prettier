@@ -53,9 +53,9 @@ Observed files are an addition to the format-on-save settings, not a replacement
 
 ## Customization
 
-The status-bar items can be restyled from your `styles.less`, e.g.:
+The status-bar items can be restyled from your `styles.css`, e.g.:
 
-```less
+```css
 .prettier-observed-status {
   color: var(--text-color-info);
 }
