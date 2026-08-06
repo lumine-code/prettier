@@ -1,0 +1,5 @@
+# The specs compare formatted output byte for byte, so the fixtures must check
+# out with the same line endings on every platform — a Windows runner's
+# autocrlf would otherwise hand the suite CRLF files whose endings survive
+# formatting, since the buffer normalizes inserted text to its own EOL.
+spec/fixtures/** text eol=lf
