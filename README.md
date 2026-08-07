@@ -26,16 +26,13 @@ To install `prettier` search for _prettier_ in the Install pane of the Lumine se
 Commands available in `atom-workspace`:
 
 - `prettier:format`: format the active editor,
+- `prettier:format-selected`: format selected files or folders from the tree view,
 - `prettier:format-projects`: format all files in open projects,
 - `prettier:toggle`: toggle format on save,
 - `prettier:toggle-observed`: observe or stop observing the active file for format-on-save,
 - `prettier:observed-files`: list the files observed for format-on-save,
 - `prettier:clear-all-observed-files`: stop observing every file at once,
 - `prettier:show-diagnostics`: show diagnostic information.
-
-Commands available in `.tree-view`:
-
-- `prettier:format-selected`: format selected files or folders from the tree view.
 
 ## Usage
 

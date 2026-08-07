@@ -1,9 +1,15 @@
 {
   "context-menu": {
-    "atom-text-editor": [
+    "atom-text-editor:not([mini])": [
+      {
+        "type": "separator"
+      },
       {
         "label": "Format with Prettier",
         "command": "prettier:format"
+      },
+      {
+        "type": "separator"
       }
     ]
   },
@@ -19,16 +25,15 @@
               "command": "prettier:format"
             },
             {
-              "label": "Format Projects",
-              "command": "prettier:format-projects"
-            },
-            {
               "label": "Format Selected",
               "command": "prettier:format-selected"
             },
             {
-              "label": "Show Diagnostics",
-              "command": "prettier:show-diagnostics"
+              "label": "Format Projects",
+              "command": "prettier:format-projects"
+            },
+            {
+              "type": "separator"
             },
             {
               "label": "Toggle Format on Save",
@@ -39,12 +44,19 @@
               "command": "prettier:toggle-observed"
             },
             {
+              "type": "separator"
+            },
+            {
               "label": "Observed Files",
               "command": "prettier:observed-files"
             },
             {
               "label": "Clear All Observed Files",
               "command": "prettier:clear-all-observed-files"
+            },
+            {
+              "label": "Show Diagnostics",
+              "command": "prettier:show-diagnostics"
             }
           ]
         }
