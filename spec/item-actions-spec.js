@@ -6,16 +6,16 @@ describe("prettier item actions", () => {
   let list;
 
   beforeEach(async () => {
-    jasmine.attachToDOM(atom.views.getView(atom.workspace));
+    jasmine.attachToDOM(lumine.views.getView(lumine.workspace));
     // The package defers activation until the shell environment is loaded.
-    atom.packages.triggerDeferredActivationHooks();
-    atom.packages.triggerActivationHook("core:loaded-shell-environment");
-    await atom.packages.activatePackage("prettier");
+    lumine.packages.triggerDeferredActivationHooks();
+    lumine.packages.triggerActivationHook("core:loaded-shell-environment");
+    await lumine.packages.activatePackage("prettier");
 
     // The observed-files list is module-private: reach its view through the
     // modal panel that showing it creates.
-    atom.commands.dispatch(atom.views.getView(atom.workspace), "prettier:observed-files");
-    list = atom.workspace
+    lumine.commands.dispatch(lumine.views.getView(lumine.workspace), "prettier:observed-files");
+    list = lumine.workspace
       .getModalPanels()
       .map((panel) => panel.getItem())
       .find((item) => item.element?.classList.contains("prettier-observed-files-list"));
@@ -24,7 +24,7 @@ describe("prettier item actions", () => {
 
   afterEach(async () => {
     observedFiles.clearObserved();
-    await atom.packages.deactivatePackage("prettier");
+    await lumine.packages.deactivatePackage("prettier");
   });
 
   it("derives its action from the command registration and the keymap", () => {
@@ -50,7 +50,7 @@ describe("prettier item actions", () => {
     await list.showItemActions();
 
     expect(list.itemActionsList.isVisible()).toBeTruthy();
-    expect(atom.workspace.getModalTrail()).toEqual(["Observed Files", "Actions"]);
+    expect(lumine.workspace.getModalTrail()).toEqual(["Observed Files", "Actions"]);
     // The actions list wears the package class, so the package keymap
     // resolves action keystrokes inside it too.
     expect(list.itemActionsList.element.classList.contains("prettier-observed-files-list")).toBe(

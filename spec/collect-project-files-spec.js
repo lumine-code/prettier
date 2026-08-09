@@ -28,7 +28,7 @@ describe("prettier project file collection", () => {
 
   beforeEach(() => {
     dir = buildFixture();
-    atom.config.set("prettier.excludeVcsIgnoredPaths", true);
+    lumine.config.set("prettier.excludeVcsIgnoredPaths", true);
   });
 
   it("collects the files under a directory", async () => {
@@ -45,14 +45,14 @@ describe("prettier project file collection", () => {
   });
 
   it("includes VCS-ignored files when the setting is off", async () => {
-    atom.config.set("prettier.excludeVcsIgnoredPaths", false);
+    lumine.config.set("prettier.excludeVcsIgnoredPaths", false);
     const files = relativize(dir, await collectProjectFiles([dir], true));
 
     expect(files.has("build/bundle.js")).toBe(true);
   });
 
   it("never descends into .git", async () => {
-    atom.config.set("prettier.excludeVcsIgnoredPaths", false);
+    lumine.config.set("prettier.excludeVcsIgnoredPaths", false);
     const files = relativize(dir, await collectProjectFiles([dir], true));
 
     expect([...files].some((file) => file.startsWith(".git/"))).toBe(false);

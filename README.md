@@ -23,7 +23,7 @@ To install `prettier` search for _prettier_ in the Install pane of the Lumine se
 
 ## Commands
 
-Commands available in `atom-workspace`:
+Commands available in `lumine-workspace`:
 
 - `prettier:format`: format the active editor,
 - `prettier:format-selected`: format selected files or folders from the tree view,

@@ -16,15 +16,15 @@ describe("prettier", () => {
   }
 
   beforeEach(async () => {
-    workspaceElement = atom.views.getView(atom.workspace);
+    workspaceElement = lumine.views.getView(lumine.workspace);
     jasmine.attachToDOM(workspaceElement);
 
-    atom.project.setPaths([PROJECT_DIR]);
+    lumine.project.setPaths([PROJECT_DIR]);
 
     // The package defers activation until the shell environment is loaded.
-    atom.packages.triggerDeferredActivationHooks();
-    atom.packages.triggerActivationHook("core:loaded-shell-environment");
-    await atom.packages.activatePackage("prettier");
+    lumine.packages.triggerDeferredActivationHooks();
+    lumine.packages.triggerActivationHook("core:loaded-shell-environment");
+    await lumine.packages.activatePackage("prettier");
   });
 
   afterEach(() => {
@@ -34,7 +34,7 @@ describe("prettier", () => {
 
   describe("activation", () => {
     it("registers the workspace commands", () => {
-      const commands = atom.commands
+      const commands = lumine.commands
         .findCommands({ target: workspaceElement })
         .map((command) => command.name);
 
@@ -75,18 +75,18 @@ describe("prettier", () => {
 
     it("toggles the active file on and off", async () => {
       const filePath = writeTempFile("toggle.js", "const a = 1;\n");
-      await atom.workspace.open(filePath);
+      await lumine.workspace.open(filePath);
 
-      atom.commands.dispatch(workspaceElement, "prettier:toggle-observed");
+      lumine.commands.dispatch(workspaceElement, "prettier:toggle-observed");
       expect(observedFiles.isObserved(filePath)).toBe(true);
 
-      atom.commands.dispatch(workspaceElement, "prettier:toggle-observed");
+      lumine.commands.dispatch(workspaceElement, "prettier:toggle-observed");
       expect(observedFiles.isObserved(filePath)).toBe(false);
     });
 
     it("keeps the opt-in after the file's editor is destroyed", async () => {
       const filePath = writeTempFile("closed.js", "const a = 1;\n");
-      const editor = await atom.workspace.open(filePath);
+      const editor = await lumine.workspace.open(filePath);
       observedFiles.setObserved(filePath, true);
 
       editor.destroy();
@@ -99,15 +99,15 @@ describe("prettier", () => {
       observedFiles.setObserved(writeTempFile("two.js", ""), true);
       expect(observedFiles.getObservedCount()).toBe(2);
 
-      atom.commands.dispatch(workspaceElement, "prettier:clear-all-observed-files");
+      lumine.commands.dispatch(workspaceElement, "prettier:clear-all-observed-files");
 
       expect(observedFiles.getObservedCount()).toBe(0);
     });
 
     it("formats an observed file on save while format-on-save is disabled", async () => {
-      atom.config.set("prettier.formatOnSaveOptions.enabled", false);
+      lumine.config.set("prettier.formatOnSaveOptions.enabled", false);
       const filePath = writeTempFile("observed.js", "const  foo   = {a:1}\n");
-      const editor = await atom.workspace.open(filePath);
+      const editor = await lumine.workspace.open(filePath);
       observedFiles.setObserved(filePath, true);
 
       await editor.save();
@@ -116,9 +116,9 @@ describe("prettier", () => {
     }, 60000);
 
     it("leaves an unobserved file untouched on save", async () => {
-      atom.config.set("prettier.formatOnSaveOptions.enabled", false);
+      lumine.config.set("prettier.formatOnSaveOptions.enabled", false);
       const filePath = writeTempFile("plain.js", "const  bar   = {a:1}\n");
-      const editor = await atom.workspace.open(filePath);
+      const editor = await lumine.workspace.open(filePath);
 
       await editor.save();
 
@@ -126,9 +126,9 @@ describe("prettier", () => {
     }, 60000);
 
     it("still skips a file Prettier has no parser for", async () => {
-      atom.config.set("prettier.formatOnSaveOptions.enabled", false);
+      lumine.config.set("prettier.formatOnSaveOptions.enabled", false);
       const filePath = writeTempFile("observed.xyz", "const  baz   = {a:1}\n");
-      const editor = await atom.workspace.open(filePath);
+      const editor = await lumine.workspace.open(filePath);
       observedFiles.setObserved(filePath, true);
 
       await editor.save();
@@ -139,20 +139,20 @@ describe("prettier", () => {
 
   describe("prettier:toggle", () => {
     it("flips the format-on-save setting", () => {
-      expect(atom.config.get("prettier.formatOnSaveOptions.enabled")).toBe(false);
-      atom.commands.dispatch(workspaceElement, "prettier:toggle");
-      expect(atom.config.get("prettier.formatOnSaveOptions.enabled")).toBe(true);
-      atom.commands.dispatch(workspaceElement, "prettier:toggle");
-      expect(atom.config.get("prettier.formatOnSaveOptions.enabled")).toBe(false);
+      expect(lumine.config.get("prettier.formatOnSaveOptions.enabled")).toBe(false);
+      lumine.commands.dispatch(workspaceElement, "prettier:toggle");
+      expect(lumine.config.get("prettier.formatOnSaveOptions.enabled")).toBe(true);
+      lumine.commands.dispatch(workspaceElement, "prettier:toggle");
+      expect(lumine.config.get("prettier.formatOnSaveOptions.enabled")).toBe(false);
     });
   });
 
   describe("prettier:format", () => {
     it("formats the active editor with the bundled Prettier", async () => {
-      const editor = await atom.workspace.open(path.join(PROJECT_DIR, "messy.js"));
+      const editor = await lumine.workspace.open(path.join(PROJECT_DIR, "messy.js"));
       const original = editor.getText();
 
-      atom.commands.dispatch(workspaceElement, "prettier:format");
+      lumine.commands.dispatch(workspaceElement, "prettier:format");
 
       const changed = await pollUntil(() => editor.getText() !== original);
       expect(changed).toBe(true);
@@ -160,11 +160,11 @@ describe("prettier", () => {
     }, 60000);
 
     it("warns when no parser exists for the file type", async () => {
-      await atom.workspace.open(path.join(PROJECT_DIR, "unknown.xyz"));
-      atom.commands.dispatch(workspaceElement, "prettier:format");
+      await lumine.workspace.open(path.join(PROJECT_DIR, "unknown.xyz"));
+      lumine.commands.dispatch(workspaceElement, "prettier:format");
 
       const warned = await pollUntil(() =>
-        atom.notifications
+        lumine.notifications
           .getNotifications()
           .some((notification) => notification.getMessage().includes("No parser found")),
       );
@@ -174,10 +174,10 @@ describe("prettier", () => {
 
   describe("prettier:show-diagnostics", () => {
     it("shows a diagnostics notification", async () => {
-      atom.commands.dispatch(workspaceElement, "prettier:show-diagnostics");
+      lumine.commands.dispatch(workspaceElement, "prettier:show-diagnostics");
 
       const notified = await pollUntil(() =>
-        atom.notifications
+        lumine.notifications
           .getNotifications()
           .some((notification) => notification.getMessage().includes("diagnostics")),
       );
