@@ -19,7 +19,7 @@ Formatting is provided by [Prettier](https://prettier.io).
 
 ## Installation
 
-To install `prettier` search for _prettier_ in the Install pane of the Lumine settings or run `lumine --install lumine-code/prettier`.
+To install `prettier` search for it in the Install pane of the Lumine settings, or run the command `lumine --install lumine-code/prettier`.
 
 ## Commands
 
@@ -60,10 +60,10 @@ The status-bar items can be restyled from your `styles.css`, e.g.:
 
 ## Services
 
-- **status-bar** (`^1.0.0`): consumed to show the optional format-on-save status tile and the observed-file count.
-- **busy-signal** (`^1.0.0`): consumed to report progress while project formats are running.
-- **linter.registry** (`^1.0.0`): consumed to report Prettier formatting errors as linter messages.
-- **tree-view.selection** (`^1.0.0`): consumed to resolve the selected files or folders for `prettier:format-selected`.
+- `status-bar`: consumed to show the optional format-on-save status tile and the observed-file count.
+- `busy-signal`: consumed to report progress while project formats are running.
+- `linter.registry`: consumed to report Prettier formatting errors as linter messages.
+- `tree-view.selection`: consumed to resolve the selected files or folders for `prettier:format-selected`.
 
 ## Contributing
 
