@@ -34,7 +34,7 @@ describe("prettier item actions", () => {
     const unobserve = actions[0];
     expect(unobserve.name).toBe("Unobserve Selected File");
     expect(unobserve.description).toBe(
-      "Stop formatting the selected file on save and drop it from this list",
+      "Stop formatting the selected file on save and drop it from this list.",
     );
     expect(unobserve.keystrokes).toEqual(["ctrl-d"]);
   });
