@@ -54,7 +54,7 @@ The status-bar items can be restyled from your `styles.css`, e.g.:
 
 ```css
 .prettier-observed-status {
-  color: var(--text-color-info);
+  color: var(--accent-only-text-color);
 }
 ```
 
