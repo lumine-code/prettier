@@ -34,6 +34,12 @@ Commands available in `lumine-workspace`:
 - `prettier:clear-all-observed-files`: stop observing every file at once,
 - `prettier:show-diagnostics`: show diagnostic information.
 
+Actions shown for `.prettier-observed-files-list`:
+
+- `prettier:open-selected-file`: open the selected observed file,
+- `prettier:unobserve-selected-file`: stop observing the selected file,
+- `prettier:clear-all-observed-files`: stop observing every file at once.
+
 ## Usage
 
 Prettier runs in a **child process** (`child_process.fork`) so that Prettier 3's async API works correctly inside Electron's renderer. The child process is spawned lazily on first format and shared across all editors.
