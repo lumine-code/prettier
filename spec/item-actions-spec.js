@@ -1,9 +1,11 @@
 const path = require("path");
 const os = require("os");
+const { Icon } = require("lumine");
 const observedFiles = require("../lib/observed-files");
+const ObservedFilesList = require("../lib/observed-list");
 
 describe("prettier item actions", () => {
-  let list;
+  let list, iconRegistration;
 
   beforeEach(async () => {
     jasmine.attachToDOM(lumine.views.getView(lumine.workspace));
@@ -23,8 +25,32 @@ describe("prettier item actions", () => {
   });
 
   afterEach(async () => {
+    iconRegistration?.dispose();
     observedFiles.clearObserved();
     await lumine.packages.deactivatePackage("prettier");
+  });
+
+  it("routes observed file paths through the shared icon registry", async () => {
+    const filePath = path.join(os.tmpdir(), "prettier-item-actions.js");
+    observedFiles.setObserved(filePath, true);
+    const observedList = new ObservedFilesList();
+    await observedList.update();
+    const line = observedList.selectList.element.querySelector(".primary-line");
+    expect(line).toHaveClass("icon-file-text");
+
+    iconRegistration = lumine.icons.addProvider(
+      {
+        id: "prettier-observed-files-spec",
+        handles: ["path"],
+        usesContext: true,
+        iconFor(target) {
+          return target.context === "prettier-observed-files" ? Icon.classes(["icon-flame"]) : null;
+        },
+      },
+      { priority: 100 },
+    );
+    expect(line).toHaveClass("icon-flame");
+    observedList.destroy();
   });
 
   it("derives its item and list actions from command registrations and the keymap", () => {
