@@ -38,9 +38,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
-  "activationHooks": [
-    "core:loaded-shell-environment"
-  ],
   "configSchema": {
     "formatOnSaveOptions": {
       "title": "Format on Save",

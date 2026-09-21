@@ -9,9 +9,6 @@ describe("prettier item actions", () => {
 
   beforeEach(async () => {
     jasmine.attachToDOM(lumine.views.getView(lumine.workspace));
-    // The package defers activation until the shell environment is loaded.
-    lumine.packages.triggerDeferredActivationHooks();
-    lumine.packages.triggerActivationHook("core:loaded-shell-environment");
     await lumine.packages.activatePackage("prettier");
 
     observedList = new ObservedFilesList();

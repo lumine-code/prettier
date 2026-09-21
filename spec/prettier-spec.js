@@ -20,10 +20,6 @@ describe("prettier", () => {
     jasmine.attachToDOM(workspaceElement);
 
     lumine.project.setPaths([PROJECT_DIR]);
-
-    // The package defers activation until the shell environment is loaded.
-    lumine.packages.triggerDeferredActivationHooks();
-    lumine.packages.triggerActivationHook("core:loaded-shell-environment");
     await lumine.packages.activatePackage("prettier");
   });
 
