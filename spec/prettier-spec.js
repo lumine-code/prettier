@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
+const { execFileSync } = require("child_process");
 
 const PROJECT_DIR = path.join(__dirname, "fixtures", "project");
 
@@ -13,6 +14,33 @@ describe("prettier", () => {
       await new Promise((resolve) => requestAnimationFrame(resolve));
     }
     return condition();
+  }
+
+  async function waitForFrames(frames = 30) {
+    for (let i = 0; i < frames; i++) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+  }
+
+  function git(cwd, ...args) {
+    return execFileSync("git", args, {
+      cwd,
+      encoding: "utf8",
+      env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+    }).trimEnd();
+  }
+
+  function initializeRepository(directory, files) {
+    git(directory, "init", "-q");
+    git(directory, "config", "user.name", "Prettier Spec");
+    git(directory, "config", "user.email", "prettier-spec@invalid.example");
+    git(directory, "config", "core.autocrlf", "false");
+    git(directory, "config", "commit.gpgsign", "false");
+    for (const [name, contents] of Object.entries(files)) {
+      fs.writeFileSync(path.join(directory, name), contents);
+    }
+    git(directory, "add", "--", ...Object.keys(files));
+    git(directory, "commit", "-qm", "Initial fixture");
   }
 
   beforeEach(async () => {
@@ -178,6 +206,82 @@ describe("prettier", () => {
           .some((notification) => notification.getMessage().includes("diagnostics")),
       );
       expect(notified).toBe(true);
+    }, 60000);
+  });
+
+  describe("Git index safety", () => {
+    let tempDir;
+
+    beforeEach(() => {
+      tempDir = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), "prettier-git-")));
+    });
+
+    afterEach(() => {
+      lumine.config.set("prettier.formatOnSaveOptions.enabled", false);
+      lumine.project.setPaths([PROJECT_DIR]);
+      for (const editor of lumine.workspace.getTextEditors()) {
+        if (editor.getPath()?.startsWith(tempDir)) editor.destroy();
+      }
+      try {
+        fs.rmSync(tempDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
+      } catch {
+        // Windows can keep short-lived Git or file-watcher handles open after a spec.
+      }
+    });
+
+    it("preserves partially staged content when formatting on save", async () => {
+      const fileName = "partial.js";
+      const filePath = path.join(tempDir, fileName);
+      initializeRepository(tempDir, { [fileName]: "const value = 1;\n" });
+      fs.writeFileSync(filePath, "const value = 2;\n");
+      git(tempDir, "add", "--", fileName);
+      const stagedHash = git(tempDir, "rev-parse", `:${fileName}`);
+
+      lumine.config.set("prettier.formatOnSaveOptions.enabled", true);
+      const editor = await lumine.workspace.open(filePath);
+      editor.setText("const  value={answer:3}\n");
+      await editor.save();
+
+      await waitForFrames();
+      expect(editor.getText()).toBe("const value = { answer: 3 };\n");
+      expect(git(tempDir, "rev-parse", `:${fileName}`)).toBe(stagedHash);
+      expect(git(tempDir, "status", "--short", "--", fileName)).toBe(`MM ${fileName}`);
+    }, 60000);
+
+    it("leaves project formatting unstaged", async () => {
+      const fileName = "project.js";
+      const filePath = path.join(tempDir, fileName);
+      initializeRepository(tempDir, { [fileName]: "const  project={answer:1}\n" });
+      const indexHash = git(tempDir, "rev-parse", `:${fileName}`);
+      lumine.project.setPaths([tempDir]);
+
+      lumine.commands.dispatch(workspaceElement, "prettier:format-projects");
+
+      const finished = await pollUntil(() =>
+        lumine.notifications
+          .getNotifications()
+          .some((notification) => notification.getMessage().includes("Formatted 1 file(s)")),
+      );
+      expect(finished).toBe(true);
+      expect(fs.readFileSync(filePath, "utf8")).toBe("const project = { answer: 1 };\n");
+      expect(git(tempDir, "rev-parse", `:${fileName}`)).toBe(indexHash);
+      expect(git(tempDir, "status", "--short", "--", fileName)).toBe(` M ${fileName}`);
+      expect(git(tempDir, "diff", "--cached", "--name-only", "--", fileName)).toBe("");
+    }, 60000);
+
+    it("keeps an untracked file untracked after formatting on save", async () => {
+      initializeRepository(tempDir, { "tracked.txt": "fixture\n" });
+      const fileName = "untracked.js";
+      const filePath = path.join(tempDir, fileName);
+      fs.writeFileSync(filePath, "const  loose={answer:1}\n");
+      lumine.config.set("prettier.formatOnSaveOptions.enabled", true);
+      const editor = await lumine.workspace.open(filePath);
+
+      await editor.save();
+
+      await waitForFrames();
+      expect(editor.getText()).toBe("const loose = { answer: 1 };\n");
+      expect(git(tempDir, "status", "--short", "--", fileName)).toBe(`?? ${fileName}`);
     }, 60000);
   });
 });
