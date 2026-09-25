@@ -21,9 +21,6 @@
   "engines": {
     "lumine": "^1.0.0"
   },
-  "backgroundTips": [
-    "You can format the current file with Prettier using {{ 'prettier:format' | keystroke }}"
-  ],
   "main": "./lib/main.js",
   "files": [
     "keymaps",
@@ -104,6 +101,13 @@
       "description": "Log Prettier detection and resolution info to developer console.",
       "type": "boolean",
       "default": false
+    }
+  },
+  "providedServices": {
+    "background-tips.provider": {
+      "versions": {
+        "1.0.0": "provideBackgroundTips"
+      }
     }
   },
   "consumedServices": {
