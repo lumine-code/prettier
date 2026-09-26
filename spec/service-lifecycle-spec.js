@@ -20,7 +20,7 @@ describe("Prettier service lifecycle", () => {
     expect(linterInterface.get()).toBeNull();
   });
 
-  it("removes both status tiles with the status-bar edge", () => {
+  it("creates the observed counter on demand and removes both status tiles with the edge", () => {
     lumine.config.set("prettier.formatOnSaveOptions.showInStatusBar", true);
     const tiles = [];
     const statusBar = {
@@ -37,6 +37,9 @@ describe("Prettier service lifecycle", () => {
     };
 
     const registration = mainModule.consumeStatusBar(statusBar);
+    expect(tiles.length).toBe(1);
+
+    require("../lib/observed-files").setObserved(__filename, true);
     expect(tiles.length).toBe(2);
     registration.dispose();
     expect(tiles.every((tile) => tile.destroy.calls.count() === 1)).toBe(true);
