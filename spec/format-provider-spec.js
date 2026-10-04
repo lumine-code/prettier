@@ -2,7 +2,14 @@ const path = require("path");
 const { TextBuffer } = require("lumine");
 
 describe("Prettier formatting provider", () => {
-  let editor, engine, provider, resolveEngine, createFormatProvider, onError, onSuccess;
+  let editor,
+    engine,
+    provider,
+    resolveEngine,
+    createFormatProvider,
+    onError,
+    onSuccess,
+    projectPaths;
   const fixturePath = path.join(__dirname, "fixtures", "project", "messy.js");
 
   const deferred = () => {
@@ -40,6 +47,11 @@ describe("Prettier formatting provider", () => {
 
   beforeEach(async () => {
     jasmine.useRealClock();
+    projectPaths = lumine.project.getPaths();
+    // This fixture is its own project. The package's .prettierignore excludes
+    // spec/fixtures, which must not become this project's ignore policy merely
+    // because another suite ran with a different set of project directories.
+    lumine.project.setPaths([path.dirname(fixturePath)]);
     await lumine.packages.activatePackage(path.resolve(__dirname, ".."));
     // Use this package generation, including its worker after lifecycle tests.
     ({ createFormatProvider } = require("../lib/format-provider"));
@@ -64,6 +76,7 @@ describe("Prettier formatting provider", () => {
   afterEach(() => {
     editor.destroy();
     require("../lib/prettier-service").terminate();
+    lumine.project.setPaths(projectPaths);
   });
 
   it("returns a guarded file plan without changing text, selections or undo history", async () => {
