@@ -12,6 +12,19 @@ describe("Prettier service lifecycle", () => {
     expect(linter.dispose).toHaveBeenCalled();
     expect(linterInterface.get()).toBeNull();
   });
+  it("clears diagnostics when their editor moves or closes", async () => {
+    const editor = await lumine.workspace.open();
+    editor.getBuffer().setPath(__filename);
+    const linter = { dispose() {}, setMessages: jasmine.createSpy("messages") };
+    const edge = main.consumeLinterRegistry(() => linter);
+    const changedPath = __filename + ".renamed";
+    editor.getBuffer().setPath(changedPath);
+    expect(linter.setMessages).toHaveBeenCalledWith(__filename, []);
+    editor.destroy();
+    expect(linter.setMessages).toHaveBeenCalledWith(changedPath, []);
+    edge.dispose();
+  });
+
   it("removes the executor edge without discarding a newer registration", async () => {
     const first = main.consumeCodeFormatExecutor({ formatEditor: () => Promise.resolve(true) });
     const secondService = { formatEditor: jasmine.createSpy("formatEditor").and.resolveTo(true) };
