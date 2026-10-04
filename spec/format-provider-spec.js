@@ -127,7 +127,16 @@ describe("Prettier formatting provider", () => {
     expect(engine.resolveConfig.calls.mostRecent().args[1]).toBe(request.signal);
     expect(engine.format.calls.mostRecent().args[2]).toBe(request.signal);
     expect(engine.getFileInfo.calls.mostRecent().args[1].withNodeModules).toBe(false);
-    expect(resolveEngine.calls.mostRecent().args[0].buffer.file.getPath()).toBe(request.path);
+    expect(resolveEngine.calls.mostRecent().args[0]).toBe(request.path);
+  });
+
+  it("uses the supplied snapshot and revision guard without rereading the editor text", async () => {
+    const request = snapshot({ isCurrent: () => true });
+    const readText = spyOn(editor, "getText").and.callThrough();
+    expect(await provider.canFormat(editor, request)).toBe(true);
+    expect(await provider.formatEntireFile(editor, request)).toEqual([]);
+    expect(engine.format.calls.mostRecent().args[0]).toBe(request.text);
+    expect(readText).not.toHaveBeenCalled();
   });
 
   it("declines ignored or unsupported files without running the formatter", async () => {
