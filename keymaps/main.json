@@ -1,11 +1,5 @@
 {
-  // :not([mini]) because it rewrites the file. Reached from a find field the
-  // handler falls back to the active editor, so it formatted the file behind
-  // the dialog.
   "lumine-text-editor:not([mini])": {
-    "ctrl-alt-f": "prettier:format"
-  },
-  ".prettier-observed-files-list": {
-    "ctrl-d": "prettier:unobserve-selected-file"
+    "cmdorctrl-alt-f": "prettier:format"
   }
 }

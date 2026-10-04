@@ -1,18 +1,4 @@
 {
-  "context-menu": {
-    "lumine-text-editor:not([mini])": [
-      {
-        "type": "separator"
-      },
-      {
-        "label": "Format with Prettier",
-        "command": "prettier:format"
-      },
-      {
-        "type": "separator"
-      }
-    ]
-  },
   "menu": [
     {
       "label": "Packages",
@@ -33,28 +19,6 @@
               "command": "prettier:format-projects"
             },
             {
-              "type": "separator"
-            },
-            {
-              "label": "Toggle Format on Save",
-              "command": "prettier:toggle"
-            },
-            {
-              "label": "Toggle Observe Current File",
-              "command": "prettier:toggle-observed"
-            },
-            {
-              "type": "separator"
-            },
-            {
-              "label": "Observed Files",
-              "command": "prettier:observed-files"
-            },
-            {
-              "label": "Clear All Observed Files",
-              "command": "prettier:clear-all-observed-files"
-            },
-            {
               "label": "Show Diagnostics",
               "command": "prettier:show-diagnostics"
             }
@@ -62,5 +26,19 @@
         }
       ]
     }
-  ]
+  ],
+  "context-menu": {
+    "lumine-text-editor:not([mini])": [
+      {
+        "type": "separator"
+      },
+      {
+        "label": "Format with Prettier",
+        "command": "prettier:format"
+      },
+      {
+        "type": "separator"
+      }
+    ]
+  }
 }

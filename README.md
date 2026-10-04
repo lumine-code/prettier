@@ -2,74 +2,48 @@
 
 Format files using Prettier.
 
-Formatting is provided by [Prettier](https://prettier.io).
+Provides the Prettier engine to `code-format`, which owns editor commands, save hooks and applying results. Project and tree-selection formatting remain explicit Prettier operations on disk.
 
 ## Features
 
-- **Format on command**: format the active editor via `prettier:format`.
-- **Format projects**: format all files in open projects; walks every project directory, skips files that Prettier doesn't handle or that `.prettierignore` excludes, and writes back only changed files.
-- **Format selected**: format selected files or folders from the tree view.
-- **Format on save**: automatically format files when saving, with fine-grained control over which files to include or exclude.
-- **Observed files**: opt individual files into format-on-save regardless of the global switch and glob settings, and review them in a searchable list with a status-bar counter.
-- **Glob filtering**: include or exclude files from format-on-save using glob patterns.
-- **Prettier config support**: reads all standard Prettier config formats (`.prettierrc`, `.prettierrc.json`, `.prettierrc.js`, `prettier.config.js`, `package.json`, etc.) via Prettier's built-in `resolveConfig`.
-- **Status bar indicator**: optional status bar tile showing format-on-save state.
-- **Linter integration**: reports Prettier errors via the linter interface.
-- **Bundled Prettier 3**: ships with Prettier 3 and runs it in a child process to avoid Electron compatibility issues.
+- **Formatting provider**: format documents and selections through the shared hub with full syntax context.
+- **Engine resolution**: use the project's Prettier, a global installation, or bundled Prettier 3.
+- **Configuration**: read standard Prettier configuration and honor `.prettierignore`.
+- **Project formatting**: format supported files in open projects or selected files and folders from the tree view.
+- **Safe results**: calculate changes from immutable snapshots without modifying editors or cursors.
+- **Linter diagnostics**: report Prettier syntax errors with source locations.
+- **Lazy worker**: run the engine in a shared child process only when requested.
 
 ## Installation
 
 To install `prettier` search for it in the Install pane of the Lumine settings, or run the command `lumine --install lumine-code/prettier`.
 
+Install and enable `code-format` for formatting open editors. Configure formatting on save, path filters and observed files in that package.
+
 ## Commands
 
 Commands available in `lumine-workspace`:
 
-- `prettier:format`: format the active editor,
-- `prettier:format-selected`: format selected files or folders from the tree view,
-- `prettier:format-projects`: format all files in open projects,
-- `prettier:toggle`: toggle format on save,
-- `prettier:toggle-observed`: observe or stop observing the active file for format-on-save,
-- `prettier:observed-files`: list the files observed for format-on-save,
-- `prettier:clear-all-observed-files`: stop observing every file at once,
-- `prettier:show-diagnostics`: show diagnostic information.
-
-Actions shown for `.prettier-observed-files-list`:
-
-- `prettier:open-selected-file`: open the selected observed file,
-- `prettier:unobserve-selected-file`: stop observing the selected file,
-- `prettier:clear-all-observed-files`: stop observing every file at once.
+- `prettier:format`: ask the hub to format the active document or selections specifically with Prettier,
+- `prettier:format-selected`: format selected project files or folders from the tree view,
+- `prettier:format-projects`: format supported files in all open projects,
+- `prettier:show-diagnostics`: show the current file's resolved Prettier version and configuration.
 
 ## Usage
 
-Prettier runs in a **child process** (`child_process.fork`) so that Prettier 3's async API works correctly inside Electron's renderer. The child process is spawned lazily on first format and shared across all editors.
+Engine resolution checks the file's directory up to its project root, then uses the bundled engine. Enable global discovery to search npm and Yarn installations before the bundled fallback; this opt-in can delay the first request. Global discovery runs asynchronously and is shared across requests. The worker starts lazily and is reused across editors.
 
-Prettier resolution order:
-
-1. **Local**: walks up from the file's directory (bounded by the project root) looking for `node_modules/prettier/index.cjs` or `index.js`.
-2. **Global**: checks global npm and Yarn module paths.
-3. **Bundled**: falls back to the Prettier version shipped with this package.
-
-Enable **Debug Mode** in settings to log Prettier detection, resolution paths, and formatting details to the developer console.
-
-Observed files are an addition to the format-on-save settings, not a replacement: a file marked as observed is formatted on every save even when **Format Files on Save** is off or the glob, `.eslintignore`, `package.json` and config-file requirements would have excluded it. The checks that decide whether Prettier can handle the file at all still apply. Alt-click the status-bar tile or run `prettier:toggle-observed` to mark the active file. A second status-bar item on the right shows how many files are currently observed and is hidden when there are none. Left click it to open the observed-files list, where a file can be opened or dropped from observation; right click clears every observed file at once. Observed files are not remembered between sessions.
-
-## Customization
-
-The status-bar items can be restyled from your `styles.css`, e.g.:
-
-```css
-.prettier-observed-status {
-  color: var(--accent-only-text-color);
-}
-```
+Select `prettier` as the default formatter in `code-format` when it should take precedence over language-server formatting. An observed file bypasses the hub's save policy, but still respects this provider's ignore and project requirements.
 
 ## Services
 
-- `status-bar`: consumed to show the optional format-on-save status tile and the observed-file count.
-- `busy-signal`: consumed to report progress while project formats are running.
-- `linter.registry`: consumed to report Prettier formatting errors as linter messages.
-- `tree-view.selection`: consumed to resolve the selected files or folders for `prettier:format-selected`.
+- `code-format.file`: provided to calculate whole-document formatting plans.
+- `code-format.range`: provided to format selections with surrounding syntax context.
+- `code-format.executor`: consumed to delegate the explicit Prettier editor command to the hub.
+- `busy-signal`: consumed to report project formatting progress.
+- `linter.registry`: consumed to report syntax errors.
+- `tree-view.selection`: consumed to resolve selected project files and folders.
+- `background-tips.provider`: provided to teach the explicit Prettier command.
 
 ## Contributing
 

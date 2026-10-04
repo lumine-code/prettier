@@ -26,8 +26,7 @@
     "keymaps",
     "lib",
     "menus",
-    "spec",
-    "styles"
+    "spec"
   ],
   "scripts": {
     "test": "lumine --test spec",
@@ -36,59 +35,35 @@
     "format:check": "prettier --check ."
   },
   "configSchema": {
-    "formatOnSaveOptions": {
-      "title": "Format on Save",
-      "type": "object",
-      "properties": {
-        "enabled": {
-          "title": "Format Files on Save",
-          "description": "Automatically format entire file when saving.",
-          "type": "boolean",
-          "default": false
-        },
-        "respectEslintignore": {
-          "title": "Respect `.eslintignore`",
-          "description": "Skip files listed in `.eslintignore` when formatting on save.",
-          "type": "boolean",
-          "default": true
-        },
-        "showInStatusBar": {
-          "title": "Show in Status Bar",
-          "description": "Show format-on-save status in the status bar.",
-          "type": "boolean",
-          "default": false
-        },
-        "excludedGlobs": {
-          "title": "Excluded Globs",
-          "description": "Comma-separated list of file globs to exclude from formatting on save. Takes precedence over scopes.",
-          "type": "array",
-          "default": []
-        },
-        "whitelistedGlobs": {
-          "title": "Included Globs",
-          "description": "Comma-separated list of file globs to always format on save. Takes precedence over excluded globs. If non-empty, only matching files will be formatted.",
-          "type": "array",
-          "default": []
-        },
-        "isDisabledIfNotInPackageJson": {
-          "title": "Require Prettier in Dependencies",
-          "description": "Only format on save when `prettier` is in your project's `package.json` dependencies.",
-          "type": "boolean",
-          "default": false
-        },
-        "isDisabledIfNoConfigFile": {
-          "title": "Require Prettier Config",
-          "description": "Only format on save when a Prettier config file (`.prettierrc`, `prettier.config.js`, or `prettier` key in `package.json`) is found.",
-          "type": "boolean",
-          "default": false
-        },
-        "ignoreNodeModules": {
-          "title": "Ignore `node_modules`",
-          "description": "Skip files inside `node_modules` when formatting on save.",
-          "type": "boolean",
-          "default": true
-        }
-      }
+    "useGlobalPrettier": {
+      "title": "Use Global Prettier",
+      "description": "Search global npm and Yarn installations when no project-local engine exists. Disabled by default so cold saves can use the bundled engine immediately.",
+      "type": "boolean",
+      "default": false
+    },
+    "requireProjectDependency": {
+      "title": "Require Project Dependency",
+      "description": "Only offer Prettier when the project declares it as a dependency.",
+      "type": "boolean",
+      "default": false
+    },
+    "requireConfig": {
+      "title": "Require Configuration",
+      "description": "Only offer Prettier when a Prettier configuration file is found.",
+      "type": "boolean",
+      "default": false
+    },
+    "respectEslintignore": {
+      "title": "Respect .eslintignore",
+      "description": "Skip files listed in .eslintignore when offering Prettier formatting.",
+      "type": "boolean",
+      "default": true
+    },
+    "ignoreNodeModules": {
+      "title": "Ignore node_modules",
+      "description": "Skip dependencies inside node_modules when formatting.",
+      "type": "boolean",
+      "default": true
     },
     "excludeVcsIgnoredPaths": {
       "title": "Exclude VCS ignored paths",
@@ -108,14 +83,19 @@
       "versions": {
         "1.0.0": "provideBackgroundTips"
       }
+    },
+    "code-format.file": {
+      "versions": {
+        "1.0.0": "provideCodeFormatFile"
+      }
+    },
+    "code-format.range": {
+      "versions": {
+        "1.0.0": "provideCodeFormatRange"
+      }
     }
   },
   "consumedServices": {
-    "status-bar": {
-      "versions": {
-        "^1.0.0": "consumeStatusBar"
-      }
-    },
     "busy-signal": {
       "versions": {
         "^1.0.0": "consumeBusySignal"
@@ -130,6 +110,11 @@
       "versions": {
         "^1.0.0": "consumeTreeViewSelection"
       }
+    },
+    "code-format.executor": {
+      "versions": {
+        "^1.0.0": "consumeCodeFormatExecutor"
+      }
     }
   },
   "dependencies": {
@@ -142,5 +127,8 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-n": "^18.4.0",
     "globals": "^17.12.0"
-  }
+  },
+  "specPackages": [
+    "code-format"
+  ]
 }

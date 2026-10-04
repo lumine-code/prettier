@@ -1,47 +1,37 @@
 describe("Prettier service lifecycle", () => {
-  let mainModule;
-
+  let main;
   beforeEach(async () => {
-    const pack = await lumine.packages.activatePackage("prettier");
-    mainModule = pack.mainModule;
+    main = (await lumine.packages.activatePackage("prettier")).mainModule;
   });
-
-  it("removes the delegate and editor observers with the linter edge", () => {
+  it("removes the linter delegate with its service edge", () => {
     const linterInterface = require("../lib/linter-interface");
-    const linter = {
-      dispose: jasmine.createSpy("dispose"),
-      setMessages() {},
-    };
-    const registration = mainModule.consumeLinterRegistry(() => linter);
-
+    const linter = { dispose: jasmine.createSpy("dispose"), setMessages() {} };
+    const registration = main.consumeLinterRegistry(() => linter);
     expect(linterInterface.get()).toBe(linter);
     registration.dispose();
     expect(linter.dispose).toHaveBeenCalled();
     expect(linterInterface.get()).toBeNull();
   });
-
-  it("creates the observed counter on demand and removes both status tiles with the edge", () => {
-    lumine.config.set("prettier.formatOnSaveOptions.showInStatusBar", true);
-    const tiles = [];
-    const statusBar = {
-      addLeftTile() {
-        const tile = { destroy: jasmine.createSpy("destroy left tile") };
-        tiles.push(tile);
-        return tile;
-      },
-      addRightTile() {
-        const tile = { destroy: jasmine.createSpy("destroy right tile") };
-        tiles.push(tile);
-        return tile;
-      },
-    };
-
-    const registration = mainModule.consumeStatusBar(statusBar);
-    expect(tiles.length).toBe(1);
-
-    require("../lib/observed-files").setObserved(__filename, true);
-    expect(tiles.length).toBe(2);
-    registration.dispose();
-    expect(tiles.every((tile) => tile.destroy.calls.count() === 1)).toBe(true);
+  it("removes the executor edge without discarding a newer registration", async () => {
+    const first = main.consumeCodeFormatExecutor({ formatEditor: () => Promise.resolve(true) });
+    const secondService = { formatEditor: jasmine.createSpy("formatEditor").and.resolveTo(true) };
+    const second = main.consumeCodeFormatExecutor(secondService);
+    first.dispose();
+    const editor = await lumine.workspace.open();
+    const target = lumine.views.getView(lumine.workspace);
+    lumine.commands.dispatch(target, "prettier:format");
+    await Promise.resolve();
+    expect(secondService.formatEditor).toHaveBeenCalledWith(editor, {
+      provider: "prettier",
+      reason: "manual",
+    });
+    second.dispose();
+    lumine.commands.dispatch(target, "prettier:format");
+    expect(
+      lumine.notifications
+        .getNotifications()
+        .some((n) => n.getMessage().includes("Enable code-format")),
+    ).toBe(true);
+    editor.destroy();
   });
 });

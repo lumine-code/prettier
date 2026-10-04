@@ -48,6 +48,7 @@ describe("prettier", () => {
     jasmine.attachToDOM(workspaceElement);
 
     lumine.project.setPaths([PROJECT_DIR]);
+    await lumine.packages.activatePackage("code-format");
     await lumine.packages.activatePackage("prettier");
   });
 
@@ -64,110 +65,7 @@ describe("prettier", () => {
 
       expect(commands).toContain("prettier:format");
       expect(commands).toContain("prettier:format-projects");
-      expect(commands).toContain("prettier:toggle");
       expect(commands).toContain("prettier:show-diagnostics");
-      expect(commands).toContain("prettier:toggle-observed");
-      expect(commands).toContain("prettier:observed-files");
-      expect(commands).toContain("prettier:clear-all-observed-files");
-    });
-  });
-
-  describe("observed files", () => {
-    let observedFiles, tempDir;
-
-    function writeTempFile(name, contents) {
-      const filePath = path.join(tempDir, name);
-      fs.writeFileSync(filePath, contents);
-      return filePath;
-    }
-
-    beforeEach(() => {
-      observedFiles = require("../lib/observed-files");
-      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "prettier-spec-"));
-    });
-
-    afterEach(() => {
-      observedFiles.clearObserved();
-      try {
-        // Retries because Windows keeps a directory non-empty until the last handle on a
-        // child closes, and `force` swallows only ENOENT.
-        fs.rmSync(tempDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
-      } catch {
-        // Windows can refuse to delete a directory whose files were just saved.
-      }
-    });
-
-    it("toggles the active file on and off", async () => {
-      const filePath = writeTempFile("toggle.js", "const a = 1;\n");
-      await lumine.workspace.open(filePath);
-
-      lumine.commands.dispatch(workspaceElement, "prettier:toggle-observed");
-      expect(observedFiles.isObserved(filePath)).toBe(true);
-
-      lumine.commands.dispatch(workspaceElement, "prettier:toggle-observed");
-      expect(observedFiles.isObserved(filePath)).toBe(false);
-    });
-
-    it("keeps the opt-in after the file's editor is destroyed", async () => {
-      const filePath = writeTempFile("closed.js", "const a = 1;\n");
-      const editor = await lumine.workspace.open(filePath);
-      observedFiles.setObserved(filePath, true);
-
-      editor.destroy();
-
-      expect(observedFiles.isObserved(filePath)).toBe(true);
-    });
-
-    it("clears every observed file at once", () => {
-      observedFiles.setObserved(writeTempFile("one.js", ""), true);
-      observedFiles.setObserved(writeTempFile("two.js", ""), true);
-      expect(observedFiles.getObservedCount()).toBe(2);
-
-      lumine.commands.dispatch(workspaceElement, "prettier:clear-all-observed-files");
-
-      expect(observedFiles.getObservedCount()).toBe(0);
-    });
-
-    it("formats an observed file on save while format-on-save is disabled", async () => {
-      lumine.config.set("prettier.formatOnSaveOptions.enabled", false);
-      const filePath = writeTempFile("observed.js", "const  foo   = {a:1}\n");
-      const editor = await lumine.workspace.open(filePath);
-      observedFiles.setObserved(filePath, true);
-
-      await editor.save();
-
-      expect(editor.getText()).toBe("const foo = { a: 1 };\n");
-    }, 60000);
-
-    it("leaves an unobserved file untouched on save", async () => {
-      lumine.config.set("prettier.formatOnSaveOptions.enabled", false);
-      const filePath = writeTempFile("plain.js", "const  bar   = {a:1}\n");
-      const editor = await lumine.workspace.open(filePath);
-
-      await editor.save();
-
-      expect(editor.getText()).toBe("const  bar   = {a:1}\n");
-    }, 60000);
-
-    it("still skips a file Prettier has no parser for", async () => {
-      lumine.config.set("prettier.formatOnSaveOptions.enabled", false);
-      const filePath = writeTempFile("observed.xyz", "const  baz   = {a:1}\n");
-      const editor = await lumine.workspace.open(filePath);
-      observedFiles.setObserved(filePath, true);
-
-      await editor.save();
-
-      expect(editor.getText()).toBe("const  baz   = {a:1}\n");
-    }, 60000);
-  });
-
-  describe("prettier:toggle", () => {
-    it("flips the format-on-save setting", () => {
-      expect(lumine.config.get("prettier.formatOnSaveOptions.enabled")).toBe(false);
-      lumine.commands.dispatch(workspaceElement, "prettier:toggle");
-      expect(lumine.config.get("prettier.formatOnSaveOptions.enabled")).toBe(true);
-      lumine.commands.dispatch(workspaceElement, "prettier:toggle");
-      expect(lumine.config.get("prettier.formatOnSaveOptions.enabled")).toBe(false);
     });
   });
 
@@ -190,14 +88,52 @@ describe("prettier", () => {
       const warned = await pollUntil(() =>
         lumine.notifications
           .getNotifications()
-          .some((notification) => notification.getMessage().includes("No parser found")),
+          .some((notification) => notification.getMessage().includes("No formatter available")),
       );
       expect(warned).toBe(true);
     }, 60000);
   });
 
+  describe("shared hub integration", () => {
+    it("formats an observed file on save even when the hub's switch is off", async () => {
+      const editor = await lumine.workspace.open(path.join(PROJECT_DIR, "messy.js"));
+      const source = "const  observed={answer:1}\n";
+      editor.setText(source);
+      lumine.config.set("code-format.formatOnSave", false);
+      // Warm the lazy engine without changing or saving the fixture on disk.
+      const main = lumine.packages.getActivePackage("prettier").mainModule;
+      const request = {
+        text: source,
+        path: editor.getPath(),
+        reason: "manual",
+        signal: new AbortController().signal,
+        isCurrent: () => editor.getText() === source,
+      };
+      await main.provideCodeFormatFile().canFormat(editor, request);
+      lumine.commands.dispatch(workspaceElement, "code-format:toggle-observed");
+      const manager = lumine.packages.getActivePackage("code-format").mainModule.manager;
+      await manager.formatOnSave(editor);
+      expect(editor.getText()).toBe("const observed = { answer: 1 };\n");
+      lumine.commands.dispatch(workspaceElement, "code-format:clear-all-observed-files");
+    }, 60000);
+
+    it("applies the Prettier provider through the generic command in one undo", async () => {
+      const editor = await lumine.workspace.open(path.join(PROJECT_DIR, "messy.js"));
+      const source = "const  shared={answer:2}\n";
+      editor.setText(source);
+      editor.getBuffer().clearUndoStack();
+      lumine.config.set("code-format.defaultProvider", "prettier");
+      const manager = lumine.packages.getActivePackage("code-format").mainModule.manager;
+      expect(await manager.formatCommand({ target: lumine.views.getView(editor) })).toBe(true);
+      expect(editor.getText()).toBe("const shared = { answer: 2 };\n");
+      editor.undo();
+      expect(editor.getText()).toBe(source);
+    }, 60000);
+  });
+
   describe("prettier:show-diagnostics", () => {
     it("shows a diagnostics notification", async () => {
+      await lumine.workspace.open(path.join(PROJECT_DIR, "messy.js"));
       lumine.commands.dispatch(workspaceElement, "prettier:show-diagnostics");
 
       const notified = await pollUntil(() =>
@@ -217,7 +153,7 @@ describe("prettier", () => {
     });
 
     afterEach(() => {
-      lumine.config.set("prettier.formatOnSaveOptions.enabled", false);
+      lumine.config.set("code-format.formatOnSave", false);
       lumine.project.setPaths([PROJECT_DIR]);
       for (const editor of lumine.workspace.getTextEditors()) {
         if (editor.getPath()?.startsWith(tempDir)) editor.destroy();
@@ -237,7 +173,7 @@ describe("prettier", () => {
       git(tempDir, "add", "--", fileName);
       const stagedHash = git(tempDir, "rev-parse", `:${fileName}`);
 
-      lumine.config.set("prettier.formatOnSaveOptions.enabled", true);
+      lumine.config.set("code-format.formatOnSave", true);
       const editor = await lumine.workspace.open(filePath);
       editor.setText("const  value={answer:3}\n");
       await editor.save();
@@ -274,7 +210,7 @@ describe("prettier", () => {
       const fileName = "untracked.js";
       const filePath = path.join(tempDir, fileName);
       fs.writeFileSync(filePath, "const  loose={answer:1}\n");
-      lumine.config.set("prettier.formatOnSaveOptions.enabled", true);
+      lumine.config.set("code-format.formatOnSave", true);
       const editor = await lumine.workspace.open(filePath);
 
       await editor.save();
