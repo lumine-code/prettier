@@ -26,19 +26,5 @@
         }
       ]
     }
-  ],
-  "context-menu": {
-    "lumine-text-editor:not([mini])": [
-      {
-        "type": "separator"
-      },
-      {
-        "label": "Format with Prettier",
-        "command": "prettier:format"
-      },
-      {
-        "type": "separator"
-      }
-    ]
-  }
+  ]
 }
