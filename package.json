@@ -129,6 +129,9 @@
     "globals": "^17.13.0"
   },
   "specPackages": [
-    "code-format"
+    "code-format",
+    "tree-view",
+    "busy-signal",
+    "linter"
   ]
 }
