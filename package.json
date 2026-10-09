@@ -118,6 +118,7 @@
     }
   },
   "dependencies": {
+    "ignore": "7.0.12",
     "picomatch": "^4.0.7",
     "prettier-bundled": "npm:prettier@^3.9.9"
   },
