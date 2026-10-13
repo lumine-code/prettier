@@ -25,6 +25,15 @@
           ]
         }
       ]
+    },
+    {
+      "label": "Edit",
+      "submenu": [
+        {
+          "label": "Format with Prettier",
+          "command": "prettier:format"
+        }
+      ]
     }
   ]
 }
