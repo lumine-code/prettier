@@ -31,7 +31,9 @@
       "submenu": [
         {
           "label": "Format with Prettier",
-          "command": "prettier:format"
+          "command": "prettier:format",
+          "group": "format",
+          "order": 30
         }
       ]
     }
