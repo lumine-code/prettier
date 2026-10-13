@@ -1,0 +1,22 @@
+{
+  "title": "prettier",
+  "description": "Format JavaScript source with Prettier.",
+  "recordedOn": "2026-10-13",
+  "sourceRevision": "ac8917076ae20a940990e99d30b4cf87c9d3cba8",
+  "mode": "normal",
+  "fontSettings": "default",
+  "images": [
+    {
+      "file": "demo.png",
+      "label": "Source before formatting.",
+      "width": 1100,
+      "height": 340
+    },
+    {
+      "file": "demo-2.png",
+      "label": "Source after formatting.",
+      "width": 1100,
+      "height": 340
+    }
+  ]
+}

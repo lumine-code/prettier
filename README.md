@@ -14,6 +14,10 @@ Provides the Prettier engine to `code-format`, which owns editor commands, save 
 - **Linter diagnostics**: report Prettier syntax errors with source locations.
 - **Lazy worker**: run the engine in a shared child process only when requested.
 
+![Source before formatting.](.github/demo.png)
+
+![Source after formatting.](.github/demo-2.png)
+
 ## Installation
 
 To install `prettier` search for it in the Install pane of the Lumine settings, or run the command `lumine --install lumine-code/prettier`.
