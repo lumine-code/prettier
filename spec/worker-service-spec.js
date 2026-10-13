@@ -87,4 +87,56 @@ module.exports = {
     expect(error.message).toContain("Unexpected token");
     expect(await engine.format("const value=1", { parser: "babel" })).toBe("const value = 1;\n");
   });
+
+  it("shares an ESM engine's asynchronous initialization across simultaneous requests", async () => {
+    enginePath = path.join(directory, "engine # percent%.mjs");
+    const marker = path.join(directory, "evaluations.txt");
+    fs.writeFileSync(
+      enginePath,
+      `import fs from "node:fs";
+const marker = new URL("./evaluations.txt", import.meta.url);
+fs.appendFileSync(marker, "initialized\\n");
+await new Promise(resolve => setTimeout(resolve, 30));
+export async function format(source) { return "esm: " + source; }
+`,
+    );
+    const engine = workerService.createPrettierService(enginePath);
+    expect(await Promise.all([engine.format("one", {}), engine.format("two", {})])).toEqual([
+      "esm: one",
+      "esm: two",
+    ]);
+    expect(fs.readFileSync(marker, "utf8")).toBe("initialized\n");
+  });
+
+  it("recovers from a missing engine after the project provides it", async () => {
+    const missing = path.join(directory, "installed-later.mjs");
+    const engine = workerService.createPrettierService(missing);
+    await expectAsync(engine.format("before", {})).toBeRejected();
+    fs.writeFileSync(missing, 'export default { format: source => "installed: " + source };');
+    expect(await engine.format("after", {})).toBe("installed: after");
+  });
+
+  it("settles cancellation while an ESM engine is still initializing", async () => {
+    enginePath = path.join(directory, "gated-engine.mjs");
+    const started = path.join(directory, "import.started");
+    const ready = path.join(directory, "import.ready");
+    fs.writeFileSync(
+      enginePath,
+      `import fs from "node:fs";
+const ready = new URL("./import.ready", import.meta.url);
+fs.writeFileSync(new URL("./import.started", import.meta.url), "started");
+while (!fs.existsSync(ready)) await new Promise(resolve => setTimeout(resolve, 10));
+export default { format: source => "ready: " + source };
+`,
+    );
+    const engine = workerService.createPrettierService(enginePath);
+    const controller = new AbortController();
+    const pending = engine.format("old", {}, controller.signal).catch((error) => error);
+    await conditionPromise(() => fs.existsSync(started));
+    const reason = new Error("Formatting was cancelled during engine initialization.");
+    controller.abort(reason);
+    expect(await pending).toBe(reason);
+    fs.writeFileSync(ready, "ready");
+    expect(await engine.format("next", {})).toBe("ready: next");
+  });
 });
