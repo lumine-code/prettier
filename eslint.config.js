@@ -9,7 +9,7 @@ const runtimeModules = ["lumine"];
 
 module.exports = [
   // Fixture files carry intentionally unformatted code for the specs.
-  { ignores: ["spec/fixtures/**"] },
+  { ignores: ["spec/fixtures/**", "demo/**"] },
   js.configs.recommended,
   n.configs["flat/recommended-script"],
   {
