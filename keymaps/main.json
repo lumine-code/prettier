@@ -1,5 +1,5 @@
 {
   "lumine-text-editor:not([mini])": {
-    "cmdorctrl-alt-f": "prettier:format"
+    "cmdorctrl-k shift-f": "prettier:format"
   }
 }
