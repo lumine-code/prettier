@@ -7,15 +7,15 @@
           "label": "Prettier",
           "submenu": [
             {
-              "label": "Format",
+              "label": "Format File or Selection",
               "command": "prettier:format"
             },
             {
-              "label": "Format Selected",
+              "label": "Format Tree Selection",
               "command": "prettier:format-selected"
             },
             {
-              "label": "Format Projects",
+              "label": "Format Project Files",
               "command": "prettier:format-projects"
             },
             {
