@@ -27,4 +27,29 @@ describe("Prettier command availability", () => {
       lumine.commands.canDispatch(lumine.workspace.getElement(), "prettier:format-projects"),
     ).toBe(false);
   });
+  it("checks cached tree paths without resolving real project paths or scanning the selection", () => {
+    const path = require("node:path");
+    const root = path.join(process.cwd(), "cached-project");
+    let selected = [path.join(root, "source.js")];
+    spyOn(lumine.project, "getPaths").and.returnValue([root]);
+    const resolve = spyOn(lumine.project, "relativizePath").and.throwError(
+      "Availability must not resolve filesystem identities",
+    );
+    const scan = jasmine
+      .createSpy("scan tree selection")
+      .and.throwError("Availability must use the cached snapshot");
+    lease = main.consumeTreeViewSelection({
+      getSelectionSnapshot: () => ({ paths: selected }),
+      selectedPaths: scan,
+    });
+    const tree = document.createElement("div");
+    tree.className = "tree-view";
+    expect(lumine.commands.canDispatch(tree, "prettier:format-selected")).toBeTrue();
+    selected = [path.join(process.cwd(), "cached-project-sibling", "outside.js")];
+    expect(lumine.commands.canDispatch(tree, "prettier:format-selected")).toBeFalse();
+    selected = [path.join(root, "..legitimate-child", "source.js")];
+    expect(lumine.commands.canDispatch(tree, "prettier:format-selected")).toBeTrue();
+    expect(resolve).not.toHaveBeenCalled();
+    expect(scan).not.toHaveBeenCalled();
+  });
 });
