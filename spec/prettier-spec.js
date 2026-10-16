@@ -63,7 +63,8 @@ describe("prettier", () => {
         .findCommands({ target: workspaceElement })
         .map((command) => command.name);
 
-      expect(commands).toContain("prettier:format");
+      expect(commands).not.toContain("prettier:format");
+      expect(commands).not.toContain("prettier:format-selected");
       expect(commands).toContain("prettier:format-projects");
       expect(commands).toContain("prettier:show-diagnostics");
     });
@@ -74,7 +75,7 @@ describe("prettier", () => {
       const editor = await lumine.workspace.open(path.join(PROJECT_DIR, "messy.js"));
       const original = editor.getText();
 
-      lumine.commands.dispatch(workspaceElement, "prettier:format");
+      lumine.commands.dispatch(editor.element, "prettier:format");
 
       const changed = await pollUntil(() => editor.getText() !== original);
       expect(changed).toBe(true);
@@ -82,8 +83,8 @@ describe("prettier", () => {
     }, 60000);
 
     it("warns when no parser exists for the file type", async () => {
-      await lumine.workspace.open(path.join(PROJECT_DIR, "unknown.xyz"));
-      lumine.commands.dispatch(workspaceElement, "prettier:format");
+      const editor = await lumine.workspace.open(path.join(PROJECT_DIR, "unknown.xyz"));
+      lumine.commands.dispatch(editor.element, "prettier:format");
 
       const warned = await pollUntil(() =>
         lumine.notifications
@@ -110,7 +111,7 @@ describe("prettier", () => {
         isCurrent: () => editor.getText() === source,
       };
       await main.provideCodeFormatFile().canFormat(editor, request);
-      lumine.commands.dispatch(workspaceElement, "code-format:toggle-observed");
+      lumine.commands.dispatch(editor.element, "code-format:toggle-observed");
       const manager = lumine.packages.getActivePackage("code-format").mainModule.manager;
       await manager.formatOnSave(editor);
       expect(editor.getText()).toBe("const observed = { answer: 1 };\n");

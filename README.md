@@ -26,10 +26,16 @@ Install and enable `code-format` for formatting open editors. Configure formatti
 
 ## Commands
 
+Commands available in `lumine-text-editor:not([mini]):not([readonly])`:
+
+- `prettier:format`: ask the hub to format the active document or selections specifically with Prettier.
+
+Commands available in `.tree-view`:
+
+- `prettier:format-selected`: format selected project files or folders from the tree view.
+
 Commands available in `lumine-workspace`:
 
-- `prettier:format`: ask the hub to format the active document or selections specifically with Prettier,
-- `prettier:format-selected`: format selected project files or folders from the tree view,
 - `prettier:format-projects`: format supported files in all open projects,
 - `prettier:show-diagnostics`: show the current file's resolved Prettier version and configuration.
 

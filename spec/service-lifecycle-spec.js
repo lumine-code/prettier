@@ -31,7 +31,7 @@ describe("Prettier service lifecycle", () => {
     const second = main.consumeCodeFormatExecutor(secondService);
     first.dispose();
     const editor = await lumine.workspace.open();
-    const target = lumine.views.getView(lumine.workspace);
+    const target = editor.element;
     lumine.commands.dispatch(target, "prettier:format");
     await Promise.resolve();
     expect(secondService.formatEditor).toHaveBeenCalledWith(editor, {

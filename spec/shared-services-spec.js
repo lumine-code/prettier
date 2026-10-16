@@ -11,7 +11,7 @@ describe("Prettier shared service ownership", () => {
     return lease;
   }
   function dispatchSelected() {
-    return lumine.commands.dispatch(lumine.workspace.getElement(), "prettier:format-selected");
+    return lumine.commands.dispatch(tree.element, "prettier:format-selected");
   }
   beforeEach(async () => {
     jasmine.attachToDOM(lumine.workspace.getElement());
@@ -90,7 +90,7 @@ describe("Prettier shared service ownership", () => {
     provide("code-format.executor", older);
     const latest = provide("code-format.executor", newer);
     latest.dispose();
-    await lumine.commands.dispatch(lumine.workspace.getElement(), "prettier:format");
+    await lumine.commands.dispatch(editor.element, "prettier:format");
     expect(formatter.manager.formatEditor).toHaveBeenCalledWith(editor, {
       provider: "prettier",
       reason: "manual",

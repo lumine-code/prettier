@@ -7,7 +7,7 @@ describe("Prettier selected project containment", () => {
   let tree, directory, projectPath, filePath, providers, calls, log;
 
   async function dispatchSelected() {
-    lumine.commands.dispatch(lumine.views.getView(lumine.workspace), "prettier:format-selected");
+    lumine.commands.dispatch(tree.element, "prettier:format-selected");
     await conditionPromise(
       () =>
         calls.length > 0 ||
