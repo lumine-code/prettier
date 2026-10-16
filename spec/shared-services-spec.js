@@ -83,6 +83,7 @@ describe("Prettier shared service ownership", () => {
 
   it("restores the older real executor when its replacement edge retires", async () => {
     const editor = await lumine.workspace.open();
+    editor.getBuffer().setPath(file);
     const older = formatter.provideCodeFormatExecutor();
     const newer = formatter.provideCodeFormatExecutor();
     // The actual frozen service objects are used; mock their common outer edit boundary.

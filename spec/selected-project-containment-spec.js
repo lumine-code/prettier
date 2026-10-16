@@ -7,7 +7,7 @@ describe("Prettier selected project containment", () => {
   let tree, directory, projectPath, filePath, providers, calls, log;
 
   async function dispatchSelected() {
-    lumine.commands.dispatch(tree.element, "prettier:format-selected");
+    if (!lumine.commands.dispatch(tree.element, "prettier:format-selected")) return;
     await conditionPromise(
       () =>
         calls.length > 0 ||
@@ -23,6 +23,7 @@ describe("Prettier selected project containment", () => {
     providers.push(
       lumine.packages.serviceHub.provide("tree-view.selection", "1.0.0", {
         selectedPaths: () => [target],
+        getSelectionSnapshot: () => ({ count: 1, paths: [target] }),
       }),
     );
   }
@@ -103,7 +104,8 @@ describe("Prettier selected project containment", () => {
       }
       selection(target);
       await dispatchSelected();
-      expect(log.log).toHaveBeenCalledWith("Format selected skipped outside project:", target);
+      expect(lumine.commands.canDispatch(tree.element, "prettier:format-selected")).toBe(false);
+      expect(log.log).not.toHaveBeenCalled();
       expect(calls).toEqual([]);
     });
   }
@@ -119,7 +121,8 @@ describe("Prettier selected project containment", () => {
       );
       selection(target);
       await dispatchSelected();
-      expect(log.log).toHaveBeenCalledWith("Format selected skipped outside project:", target);
+      expect(lumine.commands.canDispatch(tree.element, "prettier:format-selected")).toBe(false);
+      expect(log.log).not.toHaveBeenCalled();
       expect(calls).toEqual([]);
     });
   }

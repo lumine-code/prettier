@@ -31,6 +31,7 @@ describe("Prettier service lifecycle", () => {
     const second = main.consumeCodeFormatExecutor(secondService);
     first.dispose();
     const editor = await lumine.workspace.open();
+    editor.getBuffer().setPath(__filename);
     const target = editor.element;
     lumine.commands.dispatch(target, "prettier:format");
     await Promise.resolve();
@@ -39,12 +40,8 @@ describe("Prettier service lifecycle", () => {
       reason: "manual",
     });
     second.dispose();
-    lumine.commands.dispatch(target, "prettier:format");
-    expect(
-      lumine.notifications
-        .getNotifications()
-        .some((n) => n.getMessage().includes("Enable code-format")),
-    ).toBe(true);
+    expect(lumine.commands.dispatch(target, "prettier:format")).toBeNull();
+    expect(secondService.formatEditor.calls.count()).toBe(1);
     editor.destroy();
   });
 });
