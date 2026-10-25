@@ -1,3 +1,8 @@
+# Text uses LF on every platform; Windows command scripts require CRLF.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
 # The specs compare formatted output byte for byte, so the fixtures must check
 # out with the same line endings on every platform — a Windows runner's
 # autocrlf would otherwise hand the suite CRLF files whose endings survive
