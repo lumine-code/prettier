@@ -1,6 +1,8 @@
 describe("Prettier command availability", () => {
   let main, editor, lease;
   beforeEach(async () => {
+    const textGrammarPackage = await lumine.packages.activatePackage("language-text");
+    await textGrammarPackage.resourceLoadPromise;
     jasmine.attachToDOM(lumine.workspace.getElement());
     main = (await lumine.packages.activatePackage("prettier")).mainModule;
     editor = await lumine.workspace.open();

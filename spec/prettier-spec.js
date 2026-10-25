@@ -44,6 +44,8 @@ describe("prettier", () => {
   }
 
   beforeEach(async () => {
+    const textGrammarPackage = await lumine.packages.activatePackage("language-text");
+    await textGrammarPackage.resourceLoadPromise;
     workspaceElement = lumine.views.getView(lumine.workspace);
     jasmine.attachToDOM(workspaceElement);
 
@@ -67,6 +69,25 @@ describe("prettier", () => {
       expect(commands).not.toContain("prettier:format-selected");
       expect(commands).toContain("prettier:format-projects");
       expect(commands).toContain("prettier:show-diagnostics");
+    });
+
+    it("terminates an outstanding project task when a targeted file switches to None", async () => {
+      const { Task } = require("lumine");
+      const task = { on() {}, terminate: jasmine.createSpy("terminate project formatter") };
+      spyOn(Task, "once").and.returnValue(task);
+      const warning = spyOn(lumine.notifications, "addWarning");
+      const editor = await lumine.workspace.open(path.join(PROJECT_DIR, "messy.js"));
+      try {
+        const request = lumine.commands.dispatch(workspaceElement, "prettier:format-projects");
+        expect(await pollUntil(() => Task.once.calls.count() === 1)).toBeTrue();
+        await request;
+        editor.setGrammar(lumine.grammars.nullGrammar);
+        expect(task.terminate).toHaveBeenCalledTimes(1);
+        Task.once.calls.mostRecent().args.at(-1)();
+        expect(warning).not.toHaveBeenCalled();
+      } finally {
+        editor.destroy();
+      }
     });
   });
 

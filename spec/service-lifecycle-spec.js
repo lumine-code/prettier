@@ -1,6 +1,8 @@
 describe("Prettier service lifecycle", () => {
   let main;
   beforeEach(async () => {
+    const textGrammarPackage = await lumine.packages.activatePackage("language-text");
+    await textGrammarPackage.resourceLoadPromise;
     main = (await lumine.packages.activatePackage("prettier")).mainModule;
   });
   it("removes the linter delegate with its service edge", () => {

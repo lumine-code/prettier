@@ -46,6 +46,8 @@ describe("Prettier formatting provider", () => {
   };
 
   beforeEach(async () => {
+    const textGrammarPackage = await lumine.packages.activatePackage("language-text");
+    await textGrammarPackage.resourceLoadPromise;
     jasmine.useRealClock();
     projectPaths = lumine.project.getPaths();
     // This fixture is its own project. The package's .prettierignore excludes

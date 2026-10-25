@@ -1,5 +1,7 @@
 describe("Prettier menu command scopes", () => {
   beforeEach(async () => {
+    const textGrammarPackage = await lumine.packages.activatePackage("language-text");
+    await textGrammarPackage.resourceLoadPromise;
     jasmine.attachToDOM(lumine.workspace.getElement());
     await lumine.packages.activatePackage("prettier");
   });

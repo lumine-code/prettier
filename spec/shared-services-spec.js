@@ -14,6 +14,8 @@ describe("Prettier shared service ownership", () => {
     return lumine.commands.dispatch(tree.element, "prettier:format-selected");
   }
   beforeEach(async () => {
+    const textGrammarPackage = await lumine.packages.activatePackage("language-text");
+    await textGrammarPackage.resourceLoadPromise;
     jasmine.attachToDOM(lumine.workspace.getElement());
     directory = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), "prettier-service-")));
     file = path.join(directory, "selected.js");

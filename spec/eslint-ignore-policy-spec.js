@@ -6,6 +6,8 @@ describe("Prettier .eslintignore eligibility", () => {
   let directory, temporaryRoot, editor, originalPaths, createFormatProvider;
 
   beforeEach(async () => {
+    const textGrammarPackage = await lumine.packages.activatePackage("language-text");
+    await textGrammarPackage.resourceLoadPromise;
     jasmine.useRealClock();
     for (const method of ["openPath", "openExternal", "openApplication", "showItemInFolder"])
       spyOn(lumine.shell, method).and.returnValue(Promise.resolve());
