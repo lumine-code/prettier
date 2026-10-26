@@ -52,6 +52,60 @@ module.exports = {
     expect(await engine.format("next", {})).toBe("formatted: next");
   });
 
+  it("terminates CPU-bound cancelled work before starting a replacement engine", async () => {
+    fs.writeFileSync(
+      enginePath,
+      `const fs = require("fs"); module.exports = {
+      format(source, options) { if (source === "spin") {
+        fs.writeFileSync(options.filepath, "started"); while (true) {}
+      } return "ready: " + source; }
+    };`,
+    );
+    const engine = workerService.createPrettierService(enginePath);
+    const controller = new AbortController();
+    const marker = path.join(directory, "spin.started");
+    const outcome = engine
+      .format("spin", { filepath: marker }, controller.signal)
+      .catch((error) => error);
+    await conditionPromise(() => fs.existsSync(marker));
+    controller.abort(new Error("cancelled spin"));
+    expect((await outcome).message).toBe("cancelled spin");
+    expect(await engine.format("next", {})).toBe("ready: next");
+  });
+
+  it("checks input and result budgets on both sides of IPC and recovers", async () => {
+    fs.writeFileSync(
+      enginePath,
+      `module.exports = { format(source) {
+      return source === "large-output" ? "x".repeat(16 * 1024 * 1024 + 1) : source;
+    }};`,
+    );
+    const engine = workerService.createPrettierService(enginePath);
+    await expectAsync(engine.format("x".repeat(8 * 1024 * 1024 + 1), {})).toBeRejectedWithError(
+      /budget/,
+    );
+    const error = await engine.format("large-output", {}).catch((failure) => failure);
+    expect(error.code).toBe("ERR_PRETTIER_BUDGET");
+    expect(await engine.format("next", {})).toBe("next");
+  });
+
+  it("rejects sparse giant arrays, accessor config and escaped aggregate expansion before IPC", async () => {
+    const engine = workerService.createPrettierService(enginePath);
+    await expectAsync(engine.format("small", { list: new Array(600000000) })).toBeRejectedWithError(
+      /budget/,
+    );
+    const get = jasmine.createSpy("getter").and.throwError("should not execute");
+    await expectAsync(
+      engine.format("small", Object.defineProperty({}, "unsafe", { enumerable: true, get })),
+    ).toBeRejectedWithError(/getters/);
+    expect(get).not.toHaveBeenCalled();
+    const part = "\u0000".repeat(4 * 1024 * 1024);
+    await expectAsync(
+      engine.format("small", { repeated: [part, part, part, part, part] }),
+    ).toBeRejectedWithError(/budget/);
+    expect(await engine.format("next", {})).toBe("formatted: next");
+  });
+
   it("rejects every outstanding request on termination and starts a clean replacement worker", async () => {
     const engine = workerService.createPrettierService(enginePath);
     const markers = ["first.started", "second.started"].map((name) => path.join(directory, name));

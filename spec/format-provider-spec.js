@@ -81,6 +81,30 @@ describe("Prettier formatting provider", () => {
     lumine.project.setPaths(projectPaths);
   });
 
+  it("rejects an oversized immutable source before invoking its lazy text getter", async () => {
+    const request = snapshot({ textSource: { length: 600000000 } });
+    const guarded = {
+      ...request,
+      get text() {
+        throw new Error("source materialized");
+      },
+    };
+    await expectAsync(provider.formatEntireFile(editor, guarded)).toBeRejectedWithError(/budget/);
+    expect(resolveEngine).not.toHaveBeenCalled();
+    expect(onError).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects an oversized engine result before preparing or applying an edit", async () => {
+    engine.format.and.resolveTo("x".repeat(16 * 1024 * 1024 + 1));
+    const before = editor.getText();
+    spyOn(editor.getBuffer(), "getChangesToText").and.throwError("oversized result diffed");
+    await expectAsync(provider.formatEntireFile(editor, snapshot())).toBeRejectedWithError(
+      /budget/,
+    );
+    expect(editor.getText()).toBe(before);
+    expect(editor.getBuffer().getChangesToText).not.toHaveBeenCalled();
+  });
+
   it("returns a guarded file plan without changing text, selections or undo history", async () => {
     const source = "const  foo={a:1}\nmodule.exports=foo\n";
     const target = "const foo = { a: 1 };\nmodule.exports = foo;\n";

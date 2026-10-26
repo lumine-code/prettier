@@ -43,6 +43,8 @@ Commands available in `lumine-workspace`:
 
 Engine resolution checks the file's directory up to its project root, then uses the bundled engine. Enable global discovery to search npm and Yarn installations before the bundled fallback; this opt-in can delay the first request. Global discovery runs asynchronously and is shared across requests. The worker starts lazily and is reused across editors.
 
+Prettier parses complete strings. Its adapter accepts up to 8 Mi UTF-16 units of input and 16 Mi units of formatted output, checking source metadata before materialization and message structure before IPC serialization. The worker allows eight pending requests, has a 768 MiB JavaScript heap limit and a 30-second request deadline. Cancelling the last pending request terminates the worker; a later request starts a fresh process. Project formatting uses bounded disk decoding and verifies the file again before writing. An oversized input or result reports an error without truncating or applying partial formatted text.
+
 Select `prettier` as the default formatter in `code-format` when it should take precedence over language-server formatting. An observed file bypasses the hub's save policy, but still respects this provider's ignore and project requirements.
 
 ## Services
