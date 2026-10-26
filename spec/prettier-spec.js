@@ -89,6 +89,35 @@ describe("prettier", () => {
         editor.destroy();
       }
     });
+
+    it("omits closed files associated with None from its worker inputs", async () => {
+      const { Task } = require("lumine");
+      const previous = lumine.config.get("core.customFileTypes");
+      const events = new Map();
+      const task = {
+        on(name, callback) {
+          events.set(name, callback);
+        },
+        terminate() {},
+      };
+      spyOn(Task, "once").and.returnValue(task);
+      try {
+        lumine.config.set("core.customFileTypes", {
+          [lumine.grammars.nullGrammar.scopeName]: ["js"],
+        });
+        const request = lumine.commands.dispatch(workspaceElement, "prettier:format-projects");
+        expect(await pollUntil(() => Task.once.calls.count() === 1)).toBeTrue();
+        await request;
+        const projects = Task.once.calls.mostRecent().args[1];
+        expect(projects.flatMap((project) => project.files)).not.toContain(
+          path.join(PROJECT_DIR, "messy.js"),
+        );
+        events.get("prettier:format-done")({ totalFormatted: 0, totalErrored: 0, errors: [] });
+      } finally {
+        if (previous === undefined) lumine.config.unset("core.customFileTypes");
+        else lumine.config.set("core.customFileTypes", previous);
+      }
+    });
   });
 
   describe("prettier:format", () => {
