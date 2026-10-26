@@ -45,6 +45,8 @@ Engine resolution checks the file's directory up to its project root, then uses 
 
 Prettier parses complete strings. Its adapter accepts up to 8 Mi UTF-16 units of input and 16 Mi units of formatted output, checking source metadata before materialization and message structure before IPC serialization. The worker allows eight pending requests, has a 768 MiB JavaScript heap limit and a 30-second request deadline. Cancelling the last pending request terminates the worker; a later request starts a fresh process. Project formatting uses bounded disk decoding and verifies the file again before writing. An oversized input or result reports an error without truncating or applying partial formatted text.
 
+Project collection accepts up to 256 projects, 50,000 files and 8 Mi UTF-16 units of combined paths; the complete task packet is validated before launch. Collection cancels on budget failure or package disposal. Error reports contain at most 1 Mi units of diagnostic excerpts, mark shortened entries and report the exact omitted error count. IPC rejects accessor values, custom prototypes and `toJSON` hooks instead of invoking them during serialization. Project writes stage and sync a temporary file beside the resolved target, preserve permissions and symbolic links, verify the original content and identity immediately before publication, then replace the target atomically; write or replacement failures leave the previous file intact.
+
 Select `prettier` as the default formatter in `code-format` when it should take precedence over language-server formatting. An observed file bypasses the hub's save policy, but still respects this provider's ignore and project requirements.
 
 ## Services

@@ -127,6 +127,33 @@ module.exports = {
     expect(await next).toBe("formatted: replacement");
   });
 
+  it("rejects hidden indexed getters and inherited array serializers before native IPC", async () => {
+    const engine = workerService.createPrettierService(enginePath);
+    const getter = jasmine
+      .createSpy("hidden indexed getter")
+      .and.throwError("Native getter executed");
+    const array = [];
+    Object.defineProperty(array, "0", { get: getter, enumerable: false });
+    await expectAsync(engine.format("small", { array })).toBeRejectedWithError(/getters/);
+    expect(getter).not.toHaveBeenCalled();
+    const serializer = jasmine
+      .createSpy("inherited toJSON")
+      .and.throwError("Native serializer executed");
+    const inherited = [];
+    Object.setPrototypeOf(inherited, { toJSON: serializer });
+    await expectAsync(engine.format("small", { inherited })).toBeRejectedWithError(/plain JSON/);
+    expect(serializer).not.toHaveBeenCalled();
+    const large = [];
+    Object.defineProperty(large, "0", {
+      value: "\u0000".repeat(4 * 1024 * 1024),
+      enumerable: false,
+    });
+    await expectAsync(
+      engine.format("small", { repeated: [large, large, large, large, large] }),
+    ).toBeRejectedWithError(/budget/);
+    expect(await engine.format("next", {})).toBe("formatted: next");
+  });
+
   it("retains the real parser error location across worker IPC and still formats the next request", async () => {
     const engine = workerService.createPrettierService();
     const error = await engine.format("const =", { parser: "babel" }).then(
