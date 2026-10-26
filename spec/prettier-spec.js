@@ -90,6 +90,27 @@ describe("prettier", () => {
       }
     });
 
+    it("terminates a project task when its file is added to the workspace already using None", async () => {
+      const { Task } = require("lumine");
+      const task = { on() {}, terminate: jasmine.createSpy("terminate project formatter") };
+      spyOn(Task, "once").and.returnValue(task);
+      const warning = spyOn(lumine.notifications, "addWarning");
+      const request = lumine.commands.dispatch(workspaceElement, "prettier:format-projects");
+      expect(await pollUntil(() => Task.once.calls.count() === 1)).toBeTrue();
+      await request;
+      const editor = lumine.workspace.buildTextEditor();
+      editor.getBuffer().setPath(path.join(PROJECT_DIR, "messy.js"));
+      lumine.grammars.assignGrammar(editor, lumine.grammars.nullGrammar);
+      try {
+        lumine.workspace.getActivePane().addItem(editor);
+        expect(task.terminate).toHaveBeenCalledTimes(1);
+        Task.once.calls.mostRecent().args.at(-1)();
+        expect(warning).not.toHaveBeenCalled();
+      } finally {
+        editor.destroy();
+      }
+    });
+
     it("omits closed files associated with None from its worker inputs", async () => {
       const { Task } = require("lumine");
       const previous = lumine.config.get("core.customFileTypes");
