@@ -121,7 +121,7 @@
   "dependencies": {
     "ignore": "7.0.14",
     "picomatch": "^4.0.7",
-    "prettier-bundled": "npm:prettier@^3.9.10"
+    "prettier-bundled": "npm:prettier@^3.10.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -138,10 +138,10 @@
   ],
   "overrides": {
     "eslint@^10.14.0": {
-      "minimatch": "11.0.5"
+      "minimatch": "11.0.8"
     },
     "@eslint/config-array@0.23.5": {
-      "minimatch": "11.0.5"
+      "minimatch": "11.0.8"
     }
   }
 }
