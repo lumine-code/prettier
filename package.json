@@ -121,7 +121,7 @@
   "dependencies": {
     "ignore": "7.0.14",
     "picomatch": "^4.0.7",
-    "prettier-bundled": "npm:prettier@^3.10.0"
+    "prettier-bundled": "npm:prettier@^3.10.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
